@@ -1,0 +1,105 @@
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NULL,
+    profile_picture VARCHAR(255) DEFAULT NULL,
+    auth_provider ENUM('email', 'google') DEFAULT 'email',
+    last_login DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('owner', 'admin') DEFAULT 'admin',
+    INDEX idx_users_email(email),
+    INDEX idx_users_created_at(created_at)
+);
+
+
+CREATE TABLE enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    program ENUM('tutoring', 'teacher_training') NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    student_name VARCHAR(150) DEFAULT NULL,
+    grade VARCHAR(50) DEFAULT NULL,
+    subject VARCHAR(100) DEFAULT NULL,
+    preferred_time VARCHAR(100) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+    additional_info TEXT DEFAULT NULL,
+    status ENUM('pending', 'contacted', 'consultation_booked', 'enrolled', 'rejected') DEFAULT 'pending',
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_enrollments_email(email),
+    INDEX idx_enrollments_program(program),
+    INDEX idx_enrollments_status(status),
+    INDEX idx_enrollments_created_at(created_at)
+);
+
+CREATE TABLE contact_messages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT UNSIGNED NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    phone VARCHAR(30) NULL,
+    subject VARCHAR(200) NOT NULL,
+    inquiry_type ENUM('tutoring', 'teacher-training', 'admissions', 'technical',
+        'feedback', 'general') NOT NULL DEFAULT 'general',
+    message TEXT NOT NULL,
+    reply_message TEXT NULL,
+    status ENUM('unread', 'read', 'replied', 'archived', 'spam') NOT NULL DEFAULT 'unread',
+    admin_notes TEXT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    replied_at TIMESTAMP NULL DEFAULT NULL,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT fk_contact_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_contact_status(status),
+    INDEX idx_contact_inquiry_type(inquiry_type),
+    INDEX idx_contact_created_at(created_at),
+    INDEX idx_contact_email(email),
+    INDEX idx_contact_status_created(status, created_at),
+    INDEX idx_contact_deleted_created(deleted_at, created_at),
+    INDEX idx_contact_admin_id(admin_id)
+);
+
+CREATE TABLE notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    actor_id INT NULL,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    entity_type VARCHAR(50) NULL,
+    entity_id BIGINT UNSIGNED NULL,
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+    read_at TIMESTAMP NULL DEFAULT NULL,
+    data JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_seen TINYINT(1) NOT NULL DEFAULT 0,
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notifications_actor FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_notifications_user_read(user_id, is_read),
+    INDEX idx_notifications_created_at(created_at),
+    INDEX idx_notifications_entity(entity_type, entity_id),
+    INDEX idx_notifications_user_created(user_id, created_at DESC),
+    INDEX idx_notifications_type(type),
+    INDEX idx_notifications_user_seen(user_id, is_seen)
+);
+
+CREATE TABLE activity_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    admin_name VARCHAR(100) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50) DEFAULT NULL,
+    entity_id BIGINT UNSIGNED DEFAULT NULL,
+    description VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin_id (admin_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_action (action)
+);

@@ -1,0 +1,131 @@
+:root {
+    color-scheme: light dark;
+}
+
+:root {
+    --brand-green: #0f5b3e;
+    --brand-deep: #0a3a2a;
+    --brand-gold: #e8b12c;
+    --gray-50: #f3f3f3;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #f0f1f1;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --text: #000;
+    --white: #ffffff;
+    --body: #f1f5f9;
+    --shadow-sm: 0 1px 2px 0 #0000000d;
+    --shadow-md: 0 4px 6px -1px #0000001a;
+    --shadow-lg: 0 10px 15px -3px #0000001a;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-theme="dark"] {
+    --brand-green: #2ea87a;
+    --brand-deep: #288667;
+    --brand-gold: #e8b12c;
+    --gray-50: #1c1c1e;
+    --gray-100: #121212;
+    --gray-200: #0a0a0a;
+    --gray-300: #2c2c2e;
+    --gray-400: #646466;
+    --gray-500: #86868a;
+    --gray-600: #a9a9b3;
+    --gray-700: #d1d5db;
+    --gray-800: #e5e7eb;
+    --gray-900: #ffffff;
+    --white: #111111;
+    --body: #000000;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.7);
+    --shadow-md: 0 4px 12px -1px rgb(0 0 0 / 0.8);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.9);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--body) !important;
+    color: var(--gray-800);
+    overflow-x: hidden;
+}
+
+html, body {
+    transition: none !important;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Removes the blue flash on mobile taps */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input:not([type="checkbox"]), select, textarea {
+    border: 1px solid transparent;
+    background: var(--white);
+    color: var(--gray-900);
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+input:not([type="checkbox"]):focus, select:focus, textarea:focus,
+input:not([type="checkbox"]):focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: none;
+}
+
+html[data-theme="dark"] input:not([type="checkbox"]), html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    background: var(--gray-300);
+    color: var(--gray-900);
+}
+
+html[data-theme="dark"] .search-bar:focus-within, html[data-theme="dark"] .um-search:focus-within {
+    box-shadow: 0 0 0 3px rgba(46, 168, 122, 0.15);
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--gray-600);
+}
+
+input:disabled, select:disabled, textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--brand-green);
+    cursor: pointer;
+}
+
+.um-search, .search-bar {
+    border: 1px solid transparent;
+    transition: var(--transition);
+}
+
+.um-search:focus-within, .search-bar:focus-within {
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 3px rgba(15, 91, 62, 0.1);
+}
+
+.um-search input, .search-bar input {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.formInput:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--gray-300) inset !important;
+    -webkit-text-fill-color: var(--gray-900) !important;
+}

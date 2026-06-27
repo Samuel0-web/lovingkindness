@@ -1,0 +1,1150 @@
+@media (min-width: 768px) {
+    .profileMobileContainer {
+        display: none !important;
+    }
+
+    .profileAppRoot {
+        min-height: 100vh;
+    }
+
+    .profileDesktopLayout {
+        display: flex;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 32px;
+        gap: 32px;
+    }
+
+        .profileSidebar {
+        width: 280px;
+        flex-shrink: 0;
+        background: var(--white);
+        border-radius: 24px;
+        padding: 32px 20px;
+        border: 1px solid var(--gray-200);
+        position: sticky;
+        top: 32px;
+        height: calc(100vh - 64px);
+        overflow-y: auto;
+    }
+
+    .profileSidebarUser {
+        text-align: center;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--gray-200);
+        margin-bottom: 24px;
+    }
+
+    .profileAvatarWrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 16px;
+    }
+
+    .profileAvatarLarge {
+        width: 96px;
+        height: 96px;
+        background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .profileAvatarLarge img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profileAvatarLarge span {
+        font-size: 40px;
+        font-weight: 600;
+        color: var(--white);
+        text-transform: uppercase;
+    }
+
+    .profileAvatarEditTrigger {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 28px;
+        height: 28px;
+        background: var(--gray-800);
+        border: 2px solid var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--white);
+        transition: var(--transition);
+    }
+
+    .profileAvatarEditTrigger:hover {
+        background: var(--brand-gold);
+    }
+
+    .profileSidebarUser h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--gray-800);
+    }
+
+    .profileSidebarEmail {
+        font-size: 13px;
+        color: var(--gray-600);
+        margin-bottom: 12px;
+    }
+
+    .profileSidebarBadge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: var(--gray-100);
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+
+    .profileNavList {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .profileNavItem {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        color: var(--gray-600);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .profileNavItem i {
+        width: 20px;
+        font-size: 16px;
+    }
+
+    .profileNavItem:hover {
+        background: var(--gray-100);
+        color: var(--gray-800);
+    }
+
+    .profileNavItem.active {
+        background: var(--brand-green);
+        color: var(--white);
+    }
+
+    .profileMainContent {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profileSettingsSection {
+        display: none;
+        background: var(--white);
+        border-radius: 24px;
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .profileSettingsSection.active {
+        display: block;
+        animation: profileFadeIn 0.25s ease;
+    }
+
+    .profileSectionHeader {
+        padding: 28px 32px 20px;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .profileSectionHeader h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--gray-800);
+    }
+
+    .profileSectionHeader p {
+        font-size: 14px;
+        color: var(--gray-600);
+    }
+
+    .profileSettingsGroup {
+        padding: 8px 0;
+    }
+
+    .profileSettingRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 32px;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .profileSettingRow:last-child {
+        border-bottom: none;
+    }
+
+    .profileSettingRow.vertical {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .profileSettingLabel label {
+        font-size: 14px;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 2px;
+        color: var(--gray-700);
+    }
+
+    .profileSettingHint {
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+
+    .profileSettingValue {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .profileSettingValue > span {
+        font-size: 15px;
+        color: var(--gray-700);
+    }
+
+    .profileInlineEditBtn {
+        background: none;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--gray-600);
+        transition: var(--transition);
+    }
+
+    .profileInlineEditBtn:hover {
+        background: var(--gray-100);
+        color: var(--brand-green);
+    }
+
+    .profileInlineEditForm {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profileInlineEditForm input {
+        padding: 10px 14px;
+        border: 1px solid var(--gray-300);
+        border-radius: 12px;
+        font-size: 14px;
+        width: 260px;
+        font-family: inherit;
+    }
+
+    .profileInlineEditForm input:focus {
+        outline: none;
+        border-color: var(--brand-green);
+        box-shadow: 0 0 0 2px rgba(15, 91, 62, 0.1);
+    }
+
+    .profileInlineActions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .profileBtnPrimarySmall {
+        background: var(--brand-green);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--white);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .profileBtnPrimarySmall:hover {
+        background: var(--brand-deep);
+    }
+
+    .profileBtnSecondarySmall {
+        background: var(--gray-100);
+        border: 1px solid var(--gray-300);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--gray-700);
+    }
+
+    .profileBtnSecondarySmall:hover {
+        background: var(--gray-200);
+    }
+
+    .profileSettingValueFull {
+        width: 100%;
+    }
+
+    .profilePasswordForm {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 380px;
+    }
+
+    .profilePasswordField {
+        position: relative;
+    }
+
+    .profilePasswordField input {
+        width: 100%;
+        padding: 12px 44px 12px 14px;
+        border: 1px solid var(--gray-300);
+        border-radius: 12px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .profilePasswordField input:focus {
+        outline: none;
+        border-color: var(--brand-green);
+        box-shadow: 0 0 0 2px rgba(15, 91, 62, 0.1);
+    }
+
+    .profilePasswordToggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--gray-600);
+        padding: 4px;
+    }
+
+    .profileStrengthBar {
+        height: 4px;
+        background: var(--gray-200);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .profileStrengthFill {
+        height: 100%;
+        width: 0%;
+        transition: var(--transition);
+        border-radius: 2px;
+    }
+
+    .profileSessionDevice {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .profileSessionDevice i {
+        width: 36px;
+        height: 36px;
+        background: var(--gray-100);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: var(--gray-600);
+    }
+
+    .profileSessionDevice strong {
+        font-size: 14px;
+        display: block;
+        margin-bottom: 2px;
+        color: var(--gray-800);
+    }
+
+    .profileSessionDevice span {
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+
+    .profileSessionBadge {
+        font-size: 11px;
+        padding: 4px 10px;
+        background: var(--gray-100);
+        border-radius: 20px;
+        color: var(--brand-green);
+        font-weight: 500;
+    }
+
+    .profileActivityTimeline {
+        padding: 16px 0;
+    }
+
+    .profileTimelineItem {
+        display: flex;
+        gap: 16px;
+        padding: 16px 32px;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .profileTimelineItem:last-child {
+        border-bottom: none;
+    }
+
+    .profileTimelineIcon {
+        width: 40px;
+        height: 40px;
+        background: rgba(15, 91, 62, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--brand-green);
+    }
+
+    .profileTimelineDetails strong {
+        font-size: 14px;
+        display: block;
+        margin-bottom: 2px;
+        color: var(--gray-800);
+    }
+
+    .profileTimelineDetails span {
+        font-size: 12px;
+        color: var(--gray-600);
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .profileTimelineDetails p {
+        font-size: 13px;
+        color: var(--gray-700);
+    }
+
+    .profileBtnPrimary {
+        background: var(--brand-green);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 24px;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--white);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .profileBtnPrimary:hover {
+        background: var(--brand-deep);
+    }
+}
+
+@media (max-width: 767px) {
+    .profileDesktopLayout {
+        display: none !important;
+    }
+
+    .profileMobileContainer {
+        display: block;
+        background: var(--gray-50);
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .profileMobileHeader {
+        background: var(--white);
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid var(--gray-200);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .profileMobileAvatar {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .profileMobileAvatarImg {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .profileMobileAvatarImg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profileMobileAvatarImg span {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--white);
+        text-transform: uppercase;
+    }
+
+    .profileMobileAvatarEdit {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 22px;
+        height: 22px;
+        background: var(--gray-800);
+        border: 2px solid var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--white);
+    }
+
+    .profileMobileAvatarEdit i {
+        font-size: 9px;
+    }
+
+    .profileMobileUserInfo {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profileMobileUserInfo h1 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: var(--gray-800);
+        word-break: break-word;
+    }
+
+    .profileMobileUserInfo p {
+        font-size: 12px;
+        color: var(--gray-600);
+        word-break: break-word;
+    }
+
+    .profileAccordionList {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profileAccordionItem {
+        background: var(--white);
+        border-radius: 16px;
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+
+    .profileAccordionHeader {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: var(--white);
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: var(--transition);
+        color: var(--gray-800);
+    }
+
+    .profileAccordionTitle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .profileAccordionTitle i {
+        width: 24px;
+        color: var(--brand-green);
+        font-size: 15px;
+    }
+
+    .profileAccordionIcon {
+        color: var(--gray-600);
+        transition: transform 0.2s;
+        font-size: 13px;
+    }
+
+    .profileAccordionItem.open .profileAccordionIcon {
+        transform: rotate(180deg);
+    }
+
+    .profileAccordionContent {
+        display: none;
+        padding: 0 16px 16px;
+        border-top: 1px solid var(--gray-100);
+    }
+
+    .profileAccordionItem.open .profileAccordionContent {
+        display: block;
+    }
+
+    .profileBtnPrimarySmall {
+        background: var(--brand-green);
+        border: none;
+        padding: 10px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--white);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .profileBtnPrimarySmall:active {
+        background: var(--brand-deep);
+        transform: scale(0.97);
+    }
+
+    .profileBtnSecondarySmall {
+        background: var(--gray-100);
+        border: 1px solid var(--gray-300);
+        padding: 10px 18px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--gray-700);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .profileBtnSecondarySmall:active {
+        background: var(--gray-200);
+        transform: scale(0.97);
+    }
+
+    .profileBtnPrimary {
+        background: var(--brand-green);
+        border: none;
+        padding: 14px 20px;
+        border-radius: 30px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--white);
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .profileBtnPrimary:active {
+        background: var(--brand-deep);
+        transform: scale(0.98);
+    }
+
+    .profileMobileSettingRow {
+        padding: 14px 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .profileMobileSettingRow:last-child {
+        border-bottom: none;
+    }
+
+    .profileMobileSettingRow label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .profileMobileValueGroup {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .profileMobileValueGroup span {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--gray-800);
+        word-break: break-word;
+        flex: 1;
+    }
+
+    .profileMobileEditTrigger {
+        background: none;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--gray-600);
+        flex-shrink: 0;
+    }
+
+    .profileMobileEditTrigger:active {
+        background: var(--gray-100);
+    }
+
+    .profileMobileEditForm {
+        display: none;
+        margin-top: 12px;
+    }
+
+    .profileMobileEditForm input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 12px;
+        font-size: 14px;
+        font-family: inherit;
+        background: var(--gray-50);
+        margin-bottom: 10px;
+    }
+
+    .profileMobileEditForm input:focus {
+        outline: none;
+        border-color: var(--brand-green);
+        background: var(--white);
+    }
+
+    .profileMobileEditActions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .profileMobilePasswordForm {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 8px 0;
+    }
+
+    .profileMobilePasswordForm .profilePasswordField {
+        position: relative;
+    }
+
+    .profileMobilePasswordForm .profilePasswordField input {
+        width: 100%;
+        padding: 12px 44px 12px 14px;
+        border: 1px solid var(--gray-300);
+        border-radius: 12px;
+        font-size: 14px;
+        font-family: inherit;
+        background: var(--gray-50);
+    }
+
+    .profileMobilePasswordForm .profilePasswordField input:focus {
+        outline: none;
+        border-color: var(--brand-green);
+        background: var(--white);
+    }
+
+    .profileMobilePasswordForm .profilePasswordToggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--gray-600);
+        padding: 4px;
+    }
+
+    .profileMobilePasswordForm .profileStrengthBar {
+        margin: 4px 0;
+    }
+
+    .profileMobileTimeline {
+        padding: 4px 0;
+    }
+
+    .profileMobileTimelineItem {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .profileMobileTimelineItem:last-child {
+        border-bottom: none;
+    }
+
+    .profileTimelineDot {
+        width: 8px;
+        height: 8px;
+        background: var(--brand-green);
+        border-radius: 50%;
+        margin-top: 6px;
+        flex-shrink: 0;
+    }
+
+    .profileMobileTimelineItem strong {
+        font-size: 14px;
+        display: block;
+        margin-bottom: 2px;
+        color: var(--gray-800);
+    }
+
+    .profileMobileTimelineItem span {
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+}
+
+.profileModalOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #00000099;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.profileModalContainer {
+    background: var(--white);
+    border-radius: 24px;
+    max-width: 400px;
+    width: 90%;
+    animation: profileModalIn 0.2s ease;
+}
+
+@keyframes profileModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.profileModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.profileModalHeader h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.profileModalClose {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--gray-600);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profileModalBody {
+    padding: 20px;
+}
+
+.profileAvatarPreview {
+    text-align: center;
+}
+
+.profilePreviewCircle {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.profilePreviewCircle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profilePreviewCircle span {
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--white);
+    text-transform: uppercase;
+}
+
+.profileUploadBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    transition: var(--transition);
+}
+
+.profileUploadBtn:active {
+    background: var(--gray-200);
+}
+
+.profileUploadHint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-600);
+    margin-top: 10px;
+}
+
+.profileModalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.profileModalFooter .profileBtnSecondary {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--gray-700);
+}
+
+.profileBtnDanger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #ef4444;
+    transition: var(--transition);
+}
+
+.profileBtnDanger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+
+.profileBtnDanger:active {
+    transform: scale(0.98);
+}
+
+.profileModalFooter .profileBtnPrimary {
+    background: var(--brand-green);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+    cursor: pointer;
+}
+
+@keyframes profileFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== AVATAR / PROFILE DRAWER (MOBILE) ========== */
+.profileDrawer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: none;
+    visibility: hidden;
+    display: flex;
+    align-items: flex-end;
+}
+
+.profileDrawer.open {
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.profileDrawerBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px); /* Premium glass background overlay */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profileDrawer.open .profileDrawerBackdrop {
+    opacity: 1;
+}
+
+.profileDrawerContent {
+    position: relative;
+    width: 100%;
+    max-height: 85vh;
+    background: var(--white);
+    border-radius: 20px 20px 0 0; /* Slightly rounder, modern corners */
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Ultra-smooth native feel */
+    box-shadow: var(--shadow-lg);
+}
+
+.profileDrawer.open .profileDrawerContent {
+    transform: translateY(0);
+}
+
+/* Rounded and given a distinct bottom border to clip nicely */
+.profileDrawerStickyArea {
+    flex-shrink: 0;
+    padding-bottom: 4px;
+    background: var(--brand-green);
+    z-index: 2;
+    border-radius: 20px 20px 0 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.profileDrawerHandle {
+    width: 64px;
+    height: 5px;
+    background: var(--gray-300);
+    border-radius: 3px;
+    margin: 12px auto 8px;
+}
+
+.profileDrawerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 20px 16px;
+}
+
+.profileDrawerTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.profileDrawerCloseBtn {
+    color: var(--gray-900);
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    transition: var(--transition);
+}
+
+.profileDrawerCloseBtn:hover {
+    transform: rotate(180deg);
+}
+
+.profileDrawerBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.profileDrawerFooter {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    background: var(--white);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 12px;
+}
+
+.profileDrawerFooter button {
+    flex: 1;
+    /* Ensures buttons look uniform inside this drawer */
+    padding: 13px 10px;
+    border-radius: 36px;
+    border: none;
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+/* Responsive Visibility Logic */
+
+/* Hide drawer on desktop, show modal */
+@media (min-width: 769px) {
+    .profileDrawer {
+        display: none !important;
+    }
+}
+
+/* Hide modal on mobile, show drawer */
+@media (max-width: 768px) {
+    #avatarModal {
+        display: none !important;
+    }
+}

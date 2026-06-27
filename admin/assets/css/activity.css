@@ -1,0 +1,602 @@
+/* ==========================================================================
+   Enterprise Audit Log — Refactored for Investigation UX
+   ========================================================================== */
+:root {
+    --audit-toolbar-height: 3.25rem;
+}
+
+@media (max-width: 768px) {
+    :root {
+        --audit-toolbar-height: 5.5rem;
+    }
+}
+
+/* --- Block: audit --- */
+.audit {
+    padding: 0;
+    max-width: none;
+    font-size: 0.8125rem;
+    color: var(--gray-800);
+}
+
+/* ==========================================================================
+   Toolbar — GitHub-style unified control bar
+   ========================================================================== */
+.audit__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--body);
+    padding: 0.625rem 0 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 0;
+}
+
+.audit__search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.audit__search-icon {
+    position: absolute;
+    left: 0.625rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.audit__search-input {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 2.25rem;
+    font-size: 0.875rem;
+    color: var(--gray-900);
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    outline: none;
+    height: 2.5rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow-sm);
+}
+
+.audit__search-input::placeholder {
+    color: var(--gray-400);
+}
+
+.audit__search-input:focus {
+  border-color: var(--brand-green);
+  box-shadow: var(--shadow-sm);
+}
+
+.audit__search-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audit__search-clear[hidden] {
+    display: none;
+}
+
+.audit__search-clear i {
+    font-size: 1rem;
+    color: var(--gray-600);
+    transition: font-size .2s ease, background .3s ease;
+}
+
+.audit__search-clear i:hover {
+    font-size: 1.07rem;
+    color: var(--brand-green);
+}
+
+.audit__filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.audit__dropdown {
+    flex: 1;
+    min-width: 120px;
+}
+
+.audit__dropdown .uiDropdownTrigger {
+    min-width: 120px;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    background: var(--white);
+}
+
+.audit__dropdown .uiDropdownMenu {
+    border-radius: 8px;
+}
+
+.audit__dropdown .uiDropdownMenu button {
+    font-size: 0.75rem;
+    padding: 0.55rem 0.75rem;
+}
+
+.audit__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    height: 2.25rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.audit__btn:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+}
+
+.audit__btn--clear {
+    color: var(--gray-400);
+    background: transparent;
+    border-color: transparent;
+}
+
+.audit__btn--clear:hover {
+    color: var(--gray-600);
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+}
+
+.audit__btn--clear[hidden] {
+    display: none;
+}
+
+/* ==========================================================================
+   Panel — REMOVED. Feed is now continuous stream.
+   ========================================================================== */
+.audit__panel {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+}
+
+/* ==========================================================================
+   Group Headers — Clean sticky separators
+   ========================================================================== */
+.audit__group {
+    margin-bottom: 0.5rem;
+}
+
+.audit__group-header {
+    position: sticky;
+    top: var(--audit-toolbar-height);
+    z-index: 10;
+    padding: 0.5rem 0 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--body);
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 0.25rem;
+}
+
+.audit__list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   Item — Dense, description-first row
+   ========================================================================== */
+.audit__item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: 0.625rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: background 0.2s ease, padding 0.2s ease;
+    position: relative;
+}
+
+.audit__item:last-child {
+    border-bottom: none;
+}
+
+.audit__item:hover {
+    background: var(--gray-50);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-color: transparent;
+}
+
+.audit__item--expanded {
+    background: var(--gray-50);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 4px;
+    border-bottom-color: transparent;
+}
+
+/* ==========================================================================
+   Icons — Reduced visual weight, secondary indicator
+   ========================================================================== */
+.audit__item-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    background: var(--gray-100);
+    color: var(--gray-400);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.audit__item--create .audit__item-icon {
+    background: #05966914;
+    color: #059669;
+}
+
+.audit__item--update .audit__item-icon {
+    background: #2563eb14;
+    color: #2563eb;
+}
+
+.audit__item--delete .audit__item-icon {
+    background: #dc262614;
+    color: #dc2626;
+}
+
+/* ==========================================================================
+   Main Content — Description leads, actor follows
+   ========================================================================== */
+.audit__item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.audit__item-title {
+    font-size: 0.8125rem;
+    color: var(--gray-800);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    line-height: 1.4;
+}
+
+.audit__actor {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 0.8125rem;
+}
+
+.audit__action-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: 8px;
+    background: var(--gray-100);
+    color: var(--gray-500);
+    border: 1px solid var(--gray-200);
+    line-height: 1.4;
+}
+
+.audit__item--create .audit__action-badge {
+    background: rgba(5, 150, 105, 0.06);
+    color: #059669;
+    border-color: rgba(5, 150, 105, 0.15);
+}
+
+.audit__item--update .audit__action-badge {
+    background: rgba(37, 99, 235, 0.06);
+    color: #2563eb;
+    border-color: rgba(37, 99, 235, 0.15);
+}
+
+.audit__item--delete .audit__action-badge {
+    background: rgba(220, 38, 38, 0.06);
+    color: #dc2626;
+    border-color: rgba(220, 38, 38, 0.15);
+}
+
+/* Description — PRIMARY visible content */
+.audit__item-description {
+    font-size: 0.8125rem;
+    color: var(--gray-700);
+    line-height: 1.45;
+    margin-top: 0.125rem;
+    word-break: break-word;
+}
+
+/* ==========================================================================
+   Meta Chips — Compact tags, low visual weight
+   ========================================================================== */
+.audit__item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+}
+
+.audit__meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: var(--gray-300);
+    border: none;
+    white-space: nowrap;
+}
+
+.audit__meta-chip i {
+    font-size: 0.55rem;
+}
+
+.audit__meta-chip--ip {
+    background: var(--gray-300);
+}
+
+.audit__meta-chip--time {
+    display: none;
+}
+
+/* ==========================================================================
+   Right Timestamp — Subtle
+   ========================================================================== */
+.audit__item-time {
+    font-size: 0.6875rem;
+    color: var(--gray-400);
+    white-space: nowrap;
+    text-align: right;
+    padding-top: 0.125rem;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   Expand Affordance — Subtle indicator
+   ========================================================================== */
+.audit__item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    border-radius: 0 2px 2px 0;
+    transition: background 0.15s;
+}
+
+.audit__item:hover::after {
+    background: var(--gray-300);
+}
+
+.audit__item--expanded::after {
+    background: var(--brand-green) !important;
+}
+
+/* ==========================================================================
+   Details Panel — Lightweight, attached inline
+   ========================================================================== */
+.audit__item-details {
+    grid-column: 1 / -1;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.2s ease;
+    margin-top: 0;
+}
+
+.audit__item--expanded .audit__item-details {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 0.5rem;
+}
+
+.audit__details-box {
+    background: var(--gray-50);
+    border: none;
+    border-left: 3px solid var(--brand-green);
+    border-radius: 0 6px 6px 0;
+    padding: 0.625rem 1rem;
+    margin-left: 2.125rem;
+    box-shadow: none;
+}
+
+.audit__details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.625rem;
+    margin-bottom: 0.625rem;
+}
+
+.audit__details-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.audit__details-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.audit__details-value {
+    font-size: 0.75rem;
+    color: var(--gray-900);
+    word-break: break-all;
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+.audit__empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--gray-400);
+}
+
+.audit__empty-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--gray-300);
+}
+
+.audit__empty-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin: 0 0 0.25rem;
+}
+
+.audit__empty-text {
+    font-size: 0.8125rem;
+    color: var(--gray-400);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   Dark Mode
+   ========================================================================== */
+html[data-theme="dark"] .audit__search-input,
+html[data-theme="dark"] .audit__btn {
+    background: var(--white);
+    border-color: var(--gray-200);
+}
+
+html[data-theme="dark"] .audit__item:hover,
+html[data-theme="dark"] .audit__item--expanded {
+    background: var(--gray-50);
+}
+
+html[data-theme="dark"] .audit__details-box {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+}
+
+html[data-theme="dark"] .audit__item--create .audit__item-icon {
+    background: #34d3991f;
+    color: #34d399;
+}
+html[data-theme="dark"] .audit__item--update .audit__item-icon {
+    background: #60a5fa1f;
+    color: #60a5fa;
+}
+html[data-theme="dark"] .audit__item--delete .audit__item-icon {
+    background: #f871711f;
+    color: #f87171;
+}
+
+/* ==========================================================================
+   Mobile
+   ========================================================================== */
+@media (max-width: 768px) {
+    .audit__toolbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    .audit__search {
+        order: -1;
+        flex: 0 0 100%;
+    }
+
+    .audit__filters {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .audit__item {
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem;
+        padding: 0.625rem 0.5rem;
+        margin: 0 -0.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .audit__item-time {
+        display: none;
+    }
+
+    .audit__meta-chip--time {
+        background: #64646408;
+        color: var(--gray-400);
+    }
+
+    .audit__details-box {
+        margin-left: 0;
+    }
+
+    .audit__details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .audit__item:hover,
+    .audit__item--expanded {
+        margin: 0 -0.25rem;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .audit__item-title {
+        flex-direction: column;
+        gap: 0.1rem;
+        align-items: flex-start;
+    }
+
+    .audit__item-meta {
+        gap: 0.3rem;
+    }
+
+    .audit__details-grid {
+        grid-template-columns: 1fr;
+    }
+}

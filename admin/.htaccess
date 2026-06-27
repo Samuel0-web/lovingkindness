@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Remove .php
+RewriteCond %{THE_REQUEST} \.php [NC]
+RewriteRule ^(.+)\.php$ $1 [R=301,L]
+
+# Serve real files
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Serve folders
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route everything else to admin router
+RewriteRule ^ router.php [L]

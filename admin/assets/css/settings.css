@@ -1,0 +1,225 @@
+.settingsPage {
+    min-height: 100dvh;
+    padding: 40px 20px;
+}
+
+.settingsContainer {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settingsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.settingsCard {
+    background: var(--white);
+    border-radius: 24px;
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+}
+
+.settingsCardDanger {
+    border-color: #c41212;
+}
+
+.settingsCardHeader {
+    padding: 20px 24px 0 24px;
+}
+
+.settingsCardHeader h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.settingsCardHeader p {
+    font-size: 13px;
+    color: var(--gray-600);
+}
+
+.settingsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+}
+
+.settingsLabel {
+    flex: 1;
+    padding-right: 24px;
+}
+
+.settingsLabel label {
+    font-size: 15px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+    color: var(--gray-800);
+}
+
+.settingsHint {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.4;
+}
+
+.settingsControl {
+    flex-shrink: 0;
+}
+
+.settingsDivider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 0 24px;
+}
+
+.settingsToggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.settingsToggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settingsToggleSlider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-300);
+    transition: 0.2s;
+    border-radius: 28px;
+}
+
+.settingsToggleSlider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--white);
+    transition: 0.2s;
+    border-radius: 50%;
+}
+
+.settingsToggle input:checked + .settingsToggleSlider {
+    background-color: var(--brand-green);
+}
+
+.settingsToggle input:checked + .settingsToggleSlider:before {
+    transform: translateX(24px);
+}
+
+.settingsThemeOptions {
+    display: flex;
+    gap: 12px;
+}
+
+.settingsThemeBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.settingsThemeBtn i {
+    font-size: 18px;
+    color: var(--gray-600);
+}
+
+.settingsThemeBtn span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.settingsThemeBtn:hover {
+    border-color: var(--brand-green);
+    background: rgba(15, 91, 62, 0.05);
+}
+
+.settingsThemeBtn.active {
+    border-color: var(--brand-green);
+    background: rgba(15, 91, 62, 0.1);
+}
+
+.settingsThemeBtn.active i {
+    color: var(--brand-green);
+}
+
+.settingsThemeBtn.active span {
+    color: var(--brand-green);
+}
+
+.settingsBtnDanger {
+    background: #dc2626;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--gray-900);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.settingsBtnDanger:hover {
+    background: #c41212;
+}
+
+@media (max-width: 640px) {
+    .settingsPage {
+        padding: 20px 16px;
+    }
+
+    .settingsRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .settingsLabel {
+        padding-right: 0;
+    }
+
+    .settingsControl {
+        width: 100%;
+    }
+
+    .settingsThemeOptions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .settingsThemeBtn {
+        flex: 1;
+        padding: 10px 12px;
+    }
+
+    .settingsBtnDanger {
+        width: 100%;
+    }
+}
+
+.settingsCard, .settingsThemeBtn, .settingsToggleSlider {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}

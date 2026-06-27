@@ -1,0 +1,323 @@
+#toastContainer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10001;
+}
+
+.ui-toast {
+    color: var(--gray-900);
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    min-width: 280px;
+    max-width: 380px;
+    animation: toastSlideIn 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.ui-toast[data-type="success"] {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.ui-toast[data-type="error"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.ui-toast[data-type="info"] {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.ui-toast[data-type="warning"] {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.global-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: #00000080;
+    display: flex;
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: modalFadeIn 0.2s ease;
+}
+
+.global-modal-container {
+    background: var(--white);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    animation: modalScaleIn 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.global-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 20px 0 20px;
+}
+
+.global-modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.global-modal-icon i {
+    font-size: 1.25rem;
+}
+
+.global-modal-icon.danger { background: #fee2e2; }
+.global-modal-icon.danger i { color: #e53e3e; }
+
+.global-modal-icon.warning { background: #fef5e7; }
+.global-modal-icon.warning i { color: #ed8936; }
+
+.global-modal-icon.info { background: #e0f2fe; }
+.global-modal-icon.info i { color: #3182ce; }
+
+.global-modal-icon.success { background: #e6fffa; }
+.global-modal-icon.success i { color: #38a169; }
+
+.global-modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin: 0;
+}
+
+.global-modal-body {
+    padding: 16px 20px 0 20px;
+}
+
+.global-modal-message {
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.global-modal-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 12px;
+    background: var(--gray-200);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: #e53e3e;
+}
+
+.global-modal-warning i {
+    font-size: 0.85rem;
+}
+
+.global-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+}
+
+.global-modal-btn {
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+    font-family: inherit;
+}
+
+.global-modal-btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.global-modal-btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.global-modal-btn-delete {
+    background: #e53e3e;
+    color: var(--gray-900);
+}
+
+.global-modal-btn-delete:hover {
+    background: #c53030;
+}
+
+.global-modal-btn-confirm {
+    background: #38a169;
+    color: var(--gray-900);
+}
+
+.global-modal-btn-confirm:hover {
+    background: #2f855a;
+}
+
+@media (max-width: 640px) {
+    .global-modal-container {
+        width: 92%;
+        border-radius: 18px;
+    }
+    
+    .global-modal-header {
+        padding: 18px 18px 0 18px;
+    }
+    
+    .global-modal-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .global-modal-icon i {
+        font-size: 1rem;
+    }
+    
+    .global-modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .global-modal-body {
+        padding: 12px 18px 0 18px;
+    }
+    
+    .global-modal-footer {
+        padding: 18px;
+        flex-direction: column-reverse;
+    }
+    
+    .global-modal-btn {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+.uiDropdown {
+    position: relative;
+    z-index: 998;
+    overflow: visible !important;
+}
+
+.uiDropdown.open {
+    z-index: 999;
+}
+
+.uiDropdownTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 150px;
+    padding: 12px 15px;
+    background: var(--gray-300);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.uiDropdownTrigger:hover {
+    border-color: var(--gray-300);
+}
+
+.uiDropdownTrigger i {
+    font-size: 12px;
+    transition: transform .25s ease;
+}
+
+.uiDropdown.open .uiDropdownTrigger i {
+    transform: rotate(180deg);
+}
+
+.uiDropdownMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 100%;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 6px;
+    display: none;
+    z-index: 99999;
+    box-shadow: var(--shadow-md);
+}
+
+.uiDropdown.open .uiDropdownMenu {
+    display: block;
+}
+
+.uiDropdownMenu button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--gray-700);
+    font-size: 13px;
+}
+
+.uiDropdownMenu button:hover {
+    background: var(--gray-300);
+}

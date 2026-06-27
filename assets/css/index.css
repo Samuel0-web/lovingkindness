@@ -1,0 +1,472 @@
+/* ========== INDEX PAGE SPECIFIC ========== */
+
+/* Trust Section */
+.trust-section {
+    padding: 3rem 2rem;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.trust-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.trust-item {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.trust-item i {
+    font-size: 2.5rem;
+    color: var(--brand-gold);
+    margin-bottom: 1rem;
+}
+
+.trust-item h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--brand-deep);
+}
+
+.trust-item p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+/* ========== VIRTUAL LEARNING SHOWCASE ========== */
+.virtual-learning-showcase {
+  background: linear-gradient(135deg, #fef5e6 0%, #fffbf0 100%);
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(232, 177, 44, 0.2);
+  border-bottom: 1px solid rgba(232, 177, 44, 0.2);
+}
+
+.showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.showcase-text {
+  flex: 1;
+}
+
+.showcase-icon {
+  font-size: 2.2rem;
+  color: var(--brand-gold);
+  margin-bottom: 0.8rem;
+}
+
+.showcase-text h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--brand-deep);
+  margin-bottom: 0.5rem;
+}
+
+.showcase-text p {
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.showcase-features {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.showcase-features span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  font-weight: 500;
+  background: rgba(232, 177, 44, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 40px;
+  transition: var(--transition-fast);
+}
+
+.showcase-features span:hover {
+  background: rgba(232, 177, 44, 0.2);
+  transform: translateY(-2px);
+}
+
+.showcase-cta {
+  flex-shrink: 0;
+}
+
+.btn-showcase {
+  background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 60px;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  transition: var(--transition-fast);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+
+.btn-showcase:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #1a6e4c, #0f4a35);
+}
+
+/* Responsive for showcase */
+@media (max-width: 860px) {
+  .showcase-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .showcase-features {
+    justify-content: center;
+  }
+  
+  .showcase-text h3 {
+    font-size: 1.4rem;
+  }
+  
+  .btn-showcase {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .virtual-learning-showcase {
+    padding: 2rem 1rem;
+  }
+  
+  .showcase-features span {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+  }
+  
+  .showcase-text h3 {
+    font-size: 1.2rem;
+  }
+  
+  .showcase-icon {
+    font-size: 1.8rem;
+  }
+}
+
+/* Testimonials Section */
+.testimonials-section {
+    padding: 5rem 2rem;
+    background: linear-gradient(135deg, var(--cream) 0%, #fffaf0 100%);
+}
+
+.testimonials-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.testimonial-card {
+    background: var(--white);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.testimonial-rating {
+    margin-bottom: 1rem;
+}
+
+.testimonial-rating i {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    margin-right: 0.2rem;
+}
+
+.testimonial-card p {
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--gray-200);
+}
+
+.testimonial-author strong {
+    display: block;
+    color: var(--brand-deep);
+    margin-bottom: 0.2rem;
+}
+
+.testimonial-author span {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+}
+
+/* How It Works Section */
+.how-it-works {
+    padding: 5rem 2rem;
+    background: var(--white);
+}
+
+.steps-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.step {
+    flex: 1;
+    min-width: 250px;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 auto 1rem;
+}
+
+.step-icon {
+    font-size: 2.5rem;
+    color: var(--brand-gold);
+    margin-bottom: 1rem;
+}
+
+.step h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: var(--brand-deep);
+}
+
+.step p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.step-arrow {
+    font-size: 2rem;
+    color: var(--brand-gold);
+}
+
+.steps-cta {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+/* FAQ Section */
+.faq-section {
+    padding: 5rem 2rem;
+    background: var(--cream);
+}
+
+.faq-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+}
+
+.faq-item {
+    background: var(--white);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.faq-item:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.faq-question i {
+    font-size: 1.2rem;
+    color: var(--brand-gold);
+}
+
+.faq-question h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-deep);
+}
+
+.faq-answer p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding-left: 2rem;
+}
+
+.faq-more {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+/* Resources Preview */
+.resources-preview {
+    padding: 5rem 2rem;
+    background: linear-gradient(135deg, var(--brand-green), var(--brand-deep));
+    color: white;
+}
+
+.resources-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.resources-text {
+    flex: 1;
+}
+
+.resources-text .section-tag {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--brand-gold);
+}
+
+.resources-text h2 {
+    font-size: 2rem;
+    margin: 1rem 0;
+    color: white;
+}
+
+.resources-text p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+}
+
+.resources-form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.resources-form input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.9rem 1rem;
+    border: none;
+    border-radius: 60px;
+    font-family: inherit;
+}
+
+.resources-form .btn-primary {
+    background: var(--brand-gold);
+    color: var(--brand-deep);
+    box-shadow: none;
+}
+
+.resources-form .btn-primary:hover {
+    background: #f3bc4b;
+}
+
+.resources-note {
+    font-size: 0.75rem;
+    margin-top: 0.8rem;
+    opacity: 0.7;
+}
+
+.resources-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    border-radius: 60px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+.resources-badge i {
+    font-size: 1.5rem;
+    color: var(--brand-gold);
+}
+
+.resources-badge span {
+    font-weight: 600;
+}
+
+/* Responsive overrides for index */
+@media (max-width: 860px) {
+    .steps-grid {
+        flex-direction: column;
+    }
+    .step-arrow {
+        transform: rotate(90deg);
+    }
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+    .resources-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .resources-form {
+        justify-content: center;
+    }
+    .trust-grid {
+        gap: 1rem;
+    }
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+}
