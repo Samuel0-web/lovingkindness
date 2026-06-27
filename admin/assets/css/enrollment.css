@@ -50,11 +50,11 @@ html[data-theme="dark"] .controlDock {
     transform: translateY(-8px);
     transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease,
         visibility 0.25s ease, margin-bottom 0.25s ease;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .bulkActionBar--visible {
-    max-height: 80px;
+    max-height: 200px;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -338,6 +338,11 @@ html[data-theme="dark"] .controlDock {
 .enrollmentCard--selected {
     border-color: var(--brand-green);
     box-shadow: var(--shadow-sm);
+}
+
+.enrollmentCard--focused {
+    outline: 2px solid var(--brand-green);
+    outline-offset: 2px;
 }
 
 .statusDropdown {
@@ -1015,6 +1020,67 @@ html[data-theme="dark"] .statusSelect {
     .bottomDrawer {
         display: none !important;
     }
+}
+
+/* Card entry animation */
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.enrollmentCard--animate-in {
+    animation: cardFadeIn 0.25s ease forwards;
+}
+
+/* Card exit animation */
+.enrollmentCard--removing {
+    transition: opacity 0.2s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.detailNav {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.detailNavBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.detailNavBtn:hover:not(:disabled) {
+    background: var(--brand-green);
+    border-color: var(--brand-green);
+    color: white;
+}
+
+.detailNavBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.drawerHeader .detailNav {
+    margin-left: auto;
 }
 
 .modalBody::-webkit-scrollbar{

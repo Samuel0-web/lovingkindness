@@ -98,7 +98,17 @@ const fetchEnrollments = async () => {
     const program = programValue;
     const status = statusValue;
 
+    // Save filters to localStorage
     try {
+        localStorage.setItem('enrollmentFilters', JSON.stringify({
+            search: searchInput?.value || '',
+            program: programValue,
+            status: statusValue
+        }));
+    } catch (e) { /* ignore */ }
+
+    try {
+        resetFocusedCard();
         enrollmentGrid.innerHTML = `
             <div class="emptyState">
             <svg class="loadingSpinner" viewBox="25 25 50 50">
@@ -278,6 +288,14 @@ const renderEnrollmentCards = (enrollments) => {
     attachViewHandlers();
     attachDeleteHandlers();
     attachBulkCheckboxes();
+    
+    // Stagger animation on cards
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.enrollmentCard').forEach((card, i) => {
+            card.style.animationDelay = `${i * 25}ms`;
+            card.classList.add('enrollmentCard--animate-in');
+        });
+    });
 };
 
 const updateStatusDropdown = async (trigger, newStatus) => {
@@ -373,6 +391,9 @@ resetBtn?.addEventListener('click', () => {
     if (statusTrigger) { statusTrigger.childNodes[0].textContent = 'All Statuses '; }
     selectedIds.clear();
     updateBulkUI();
+
+    // Clear localStorage
+    try { localStorage.removeItem('enrollmentFilters'); } catch (e) { /* ignore */ }
     fetchEnrollments();
 });
 
@@ -424,11 +445,104 @@ function getEmptyState() {
 
 // Command + K shortcut
 document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + A: Select all cards (when search is NOT focused)
+    if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+        if (document.activeElement !== searchInput) {
+            e.preventDefault();
+            const visibleCards = document.querySelectorAll('.enrollmentCard:not([style*="display: none"])');
+            visibleCards.forEach(card => selectedIds.add(card.dataset.id));
+            allSelected = true;
+            if (bulkSelectAllBtn) bulkSelectAllBtn.textContent = 'Deselect All';
+            updateBulkUI();
+        }
+    }
+    
+    // Ctrl/Cmd + K: Focus search
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         searchInput?.focus();
     }
 });
+
+// ========== KEYBOARD NAVIGATION ==========
+let focusedCardIndex = -1;
+
+const getVisibleCards = () => {
+    return [...document.querySelectorAll('.enrollmentCard')].filter(c => {
+        const style = c.style.display || getComputedStyle(c).display;
+        return style !== 'none';
+    });
+};
+
+document.addEventListener('keydown', (e) => {
+    const visibleCards = getVisibleCards();
+    if (!visibleCards.length) return;
+    
+    // Escape: close modal, drawer, or dropdowns
+    if (e.key === 'Escape') {
+        if (modal.style.display === 'flex') {
+            closeModal();
+            return;
+        }
+        if (drawer.classList.contains('open')) {
+            closeDrawer();
+            return;
+        }
+        document.querySelectorAll('.uiDropdown.open').forEach(d => d.classList.remove('open'));
+        return;
+    }
+    
+    // Arrow keys: navigate cards
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        
+        if (focusedCardIndex >= 0 && focusedCardIndex < visibleCards.length) {
+            visibleCards[focusedCardIndex].classList.remove('enrollmentCard--focused');
+        }
+        
+        if (e.key === 'ArrowDown') {
+            focusedCardIndex = Math.min(focusedCardIndex + 1, visibleCards.length - 1);
+        } else {
+            focusedCardIndex = Math.max(focusedCardIndex - 1, 0);
+        }
+        
+        if (focusedCardIndex < 0) focusedCardIndex = 0;
+        
+        const card = visibleCards[focusedCardIndex];
+        card.classList.add('enrollmentCard--focused');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.focus();
+        return;
+    }
+    
+    // Enter: open focused card
+    if (e.key === 'Enter' && focusedCardIndex >= 0) {
+        const card = visibleCards[focusedCardIndex];
+        const viewBtn = card.querySelector('.viewBtn');
+        if (viewBtn) viewBtn.click();
+        return;
+    }
+    
+    // Space: toggle checkbox on focused card
+    if (e.key === ' ' && focusedCardIndex >= 0) {
+        e.preventDefault();
+        const card = visibleCards[focusedCardIndex];
+        const checkbox = card.querySelector('.bulkCheckbox__input');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+    }
+});
+
+// Reset focus index when grid changes
+const resetFocusedCard = () => {
+    focusedCardIndex = -1;
+    document.querySelectorAll('.enrollmentCard--focused').forEach(c => {
+        c.classList.remove('enrollmentCard--focused');
+    });
+};
 
 // ========== VIEW DETAILS (MODAL / DRAWER) ==========
 const timeAgo = (date) => {
@@ -576,6 +690,8 @@ const updateBulkUI = () => {
         bulkActionBar?.classList.add('bulkActionBar--visible');
     } else {
         bulkActionBar?.classList.remove('bulkActionBar--visible');
+        allSelected = false;
+        if (bulkSelectAllBtn) bulkSelectAllBtn.textContent = 'Select All';
     }
     
     // Toggle bulk mode on cards
@@ -600,16 +716,48 @@ const updateBulkUI = () => {
     });
 };
 
+let lastCheckedId = null;
+
 const handleCheckboxChange = (e) => {
     e.stopPropagation();
     const checkbox = e.target;
     const id = checkbox.dataset.id;
+    const allCards = [...document.querySelectorAll('.enrollmentCard')];
+    const allCheckboxes = [...document.querySelectorAll('.bulkCheckbox__input')];
     
-    if (checkbox.checked) {
-        selectedIds.add(id);
+    if (e.shiftKey && lastCheckedId) {
+        const currentIndex = allCards.findIndex(c => c.dataset.id === id);
+        const lastIndex = allCards.findIndex(c => c.dataset.id === lastCheckedId);
+        
+        if (currentIndex !== -1 && lastIndex !== -1) {
+            const [start, end] = currentIndex < lastIndex ? [currentIndex, lastIndex] : [lastIndex, currentIndex];
+            const shouldCheck = checkbox.checked;
+            
+            for (let i = start; i <= end; i++) {
+                const cardId = allCards[i].dataset.id;
+                if (shouldCheck) {
+                    selectedIds.add(cardId);
+                } else {
+                    selectedIds.delete(cardId);
+                }
+                const cb = allCheckboxes[i];
+                if (cb) cb.checked = shouldCheck;
+            }
+        }
     } else {
-        selectedIds.delete(id);
+        if (checkbox.checked) {
+            selectedIds.add(id);
+        } else {
+            selectedIds.delete(id);
+        }
     }
+    
+    lastCheckedId = id;
+    
+    // Update Select All button text
+    const visibleCards = document.querySelectorAll('.enrollmentCard:not([style*="display: none"])');
+    allSelected = selectedIds.size >= visibleCards.length && visibleCards.length > 0;
+    if (bulkSelectAllBtn) bulkSelectAllBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
     
     updateBulkUI();
 };
@@ -622,8 +770,34 @@ const attachBulkCheckboxes = () => {
 };
 
 // Clear selection
+// Select All / Deselect All
+const bulkSelectAllBtn = document.getElementById('bulkSelectAllBtn');
+let allSelected = false;
+
+bulkSelectAllBtn?.addEventListener('click', () => {
+    const visibleCards = document.querySelectorAll('.enrollmentCard:not([style*="display: none"])');
+    
+    if (allSelected) {
+        // Deselect all
+        selectedIds.clear();
+        allSelected = false;
+        bulkSelectAllBtn.textContent = 'Select All';
+    } else {
+        // Select all visible
+        visibleCards.forEach(card => {
+            selectedIds.add(card.dataset.id);
+        });
+        allSelected = true;
+        bulkSelectAllBtn.textContent = 'Deselect All';
+    }
+    
+    updateBulkUI();
+});
+
 bulkClearBtn?.addEventListener('click', () => {
     selectedIds.clear();
+    allSelected = false;
+    if (bulkSelectAllBtn) bulkSelectAllBtn.textContent = 'Select All';
     updateBulkUI();
 });
 
@@ -691,7 +865,16 @@ const handleDeleteClick = async (e) => {
         
         if (data.ok) {
             UI.toastSuccess('Enrollment deleted successfully');
-            card.remove();
+
+            // Animate card out before removing
+            card.classList.add('enrollmentCard--removing');
+            card.addEventListener('transitionend', () => {
+                card.remove();
+                if (!document.querySelector('.enrollmentCard')) {
+                    enrollmentGrid.innerHTML = getEmptyState();
+                }
+            }, { once: true });
+
             if (!document.querySelector('.enrollmentCard')) {
                 enrollmentGrid.innerHTML = getEmptyState();
             }
@@ -791,6 +974,46 @@ drawer?.addEventListener('click', (e) => {
     e.stopPropagation();
 });
 
+const getVisibleCardIds = () => {
+    return [...document.querySelectorAll('.enrollmentCard')]
+        .filter(c => c.style.display !== 'none')
+        .map(c => c.dataset.id);
+};
+
+const updateDetailNavButtons = (currentId) => {
+    const visibleIds = getVisibleCardIds();
+    const currentIndex = visibleIds.indexOf(String(currentId));
+    
+    const prevBtns = [document.getElementById('modalPrevBtn'), document.getElementById('drawerPrevBtn')];
+    const nextBtns = [document.getElementById('modalNextBtn'), document.getElementById('drawerNextBtn')];
+    
+    prevBtns.forEach(btn => {
+        if (btn) {
+            btn.disabled = currentIndex <= 0;
+            btn.dataset.targetId = currentIndex > 0 ? visibleIds[currentIndex - 1] : '';
+        }
+    });
+    
+    nextBtns.forEach(btn => {
+        if (btn) {
+            btn.disabled = currentIndex >= visibleIds.length - 1;
+            btn.dataset.targetId = currentIndex < visibleIds.length - 1 ? visibleIds[currentIndex + 1] : '';
+        }
+    });
+};
+
+// Nav button click handlers
+const handleNavClick = async (e) => {
+    const targetId = e.currentTarget.dataset.targetId;
+    if (!targetId) return;
+    await openEnrollmentDetail(targetId);
+};
+
+document.getElementById('modalPrevBtn')?.addEventListener('click', handleNavClick);
+document.getElementById('modalNextBtn')?.addEventListener('click', handleNavClick);
+document.getElementById('drawerPrevBtn')?.addEventListener('click', handleNavClick);
+document.getElementById('drawerNextBtn')?.addEventListener('click', handleNavClick);
+
 async function openEnrollmentDetail(id) {
     try {
         const res = await fetch(`api/enrollment?action=get&id=${id}`);
@@ -800,7 +1023,7 @@ async function openEnrollmentDetail(id) {
 
             if (isMobile()) {
                 showDetailContent(data.enrollment, drawerBody);
-
+                updateDetailNavButtons(id);
                 drawer.classList.add('open');
                 document.body.style.overflow = 'hidden';
 
@@ -813,7 +1036,7 @@ async function openEnrollmentDetail(id) {
                 drawer.style.transform = '';
             } else {
                 showDetailContent(data.enrollment, modalBody);
-
+                updateDetailNavButtons(id);
                 modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             }
@@ -829,36 +1052,8 @@ async function openEnrollmentDetail(id) {
 
 // ========== VIEW HANDLER ==========
 const handleViewClick = async (e) => {
-    const btn = e.currentTarget;
-    const id = btn.dataset.id;
-    
-    try {
-        const res = await fetch(`api/enrollment?action=get&id=${id}`);
-        const data = await res.json();
-        
-        if (data.ok && data.enrollment) {
-            if (isMobile()) {
-                showDetailContent(data.enrollment, drawerBody);
-                drawer.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                // Reset drawer state
-                if (drawerBody) {
-                    drawerBody.scrollTop = 0;
-                    drawerBody.style.transform = '';
-                    drawerBody.style.overflowY = 'auto';
-                }
-                drawer.style.transform = '';
-            } else {
-                showDetailContent(data.enrollment, modalBody);
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-        } else {
-            UI.toastError('Failed to load details');
-        }
-    } catch (err) {
-        UI.toastError('Network error');
-    }
+    const id = e.currentTarget.dataset.id;
+    await openEnrollmentDetail(id);
 };
 
 const attachViewHandlers = () => {
@@ -870,7 +1065,35 @@ const attachViewHandlers = () => {
 };
 
 // ========== INITIALIZE ==========
+// ========== INITIALIZE ==========
 const init = () => {
+    // Restore filters from localStorage
+    try {
+        const saved = JSON.parse(localStorage.getItem('enrollmentFilters'));
+        if (saved) {
+            if (saved.search && searchInput) searchInput.value = saved.search;
+            if (saved.program) {
+                programValue = saved.program;
+                const programTrigger = document.querySelector('#programDropdown .uiDropdownTrigger');
+                if (programTrigger) {
+                    programTrigger.dataset.value = saved.program;
+                    const label = saved.program === 'tutoring' ? 'Tutoring' : 'Teacher Training';
+                    programTrigger.childNodes[0].textContent = label + ' ';
+                }
+            }
+            if (saved.status) {
+                statusValue = saved.status;
+                const statusTrigger = document.querySelector('#statusDropdown .uiDropdownTrigger');
+                if (statusTrigger) {
+                    statusTrigger.dataset.value = saved.status;
+                    const statusLabels = { pending: 'Pending', contacted: 'Contacted', consultation_booked: 'Consultation', enrolled: 'Enrolled', rejected: 'Rejected' };
+                    statusTrigger.childNodes[0].textContent = (statusLabels[saved.status] || 'All Statuses') + ' ';
+                }
+            }
+            fetchEnrollments();
+        }
+    } catch (e) { /* ignore */ }
+    
     attachViewHandlers();
     attachDeleteHandlers();
     attachBulkCheckboxes();

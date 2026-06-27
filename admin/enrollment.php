@@ -108,6 +108,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="bulkActionBar" id="bulkActionBar">
             <span class="bulkActionBar__count" id="bulkCount">✓ 0 selected</span>
             <button type="button" class="bulkActionBar__clear" id="bulkClearBtn">Clear Selection</button>
+            <button type="button" class="bulkActionBar__clear" id="bulkSelectAllBtn">Select All</button>
             <div class="uiDropdown" id="bulkStatusDropdown">
                 <button type="button" class="uiDropdownTrigger bulkActionBar__dropdown" data-value="">
                     Change Status
@@ -280,9 +281,17 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="modalHandle"></div>
         <div class="modalHead">
             <h3>Enrollment Details</h3>
-            <button class="modalCloseBtn" id="closeModalBtn">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="detailNav">
+                <button class="detailNavBtn" id="modalPrevBtn" disabled title="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="detailNavBtn" id="modalNextBtn" disabled title="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="modalCloseBtn" id="closeModalBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
         <div class="modalBody" id="modalBody"></div>
         <div class="modalFoot">
@@ -297,9 +306,17 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="drawerHandle"></div>
         <div class="drawerHeader">
             <h3>Enrollment Details</h3>
-            <button class="drawerCloseBtn" id="closeDrawerBtn">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="detailNav">
+                <button class="detailNavBtn" id="drawerPrevBtn" disabled title="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="detailNavBtn" id="drawerNextBtn" disabled title="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="drawerCloseBtn" id="closeDrawerBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="drawerBody" id="drawerBody"></div>
