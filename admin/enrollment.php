@@ -106,7 +106,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- Bulk Action Bar -->
         <div class="bulkActionBar" id="bulkActionBar">
-            <span class="bulkActionBar__count" id="bulkCount">✓ 0 selected</span>
+            <span class="bulkActionBar__count" id="bulkCount"><i class="fas fa-check-circle"></i> 0 selected</span>
             <button type="button" class="bulkActionBar__clear" id="bulkClearBtn">Clear Selection</button>
             <button type="button" class="bulkActionBar__clear" id="bulkSelectAllBtn">Select All</button>
             <div class="uiDropdown" id="bulkStatusDropdown">
@@ -254,7 +254,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
-            <div class="paginationBar">
+            <!-- <div class="paginationBar">
                 <div class="paginationInfo">
                     Showing <strong><?= $offset + 1 ?></strong> – <strong><?= min($offset + $limit, $total) ?></strong> of <strong><?= number_format($total) ?></strong>
                 </div>
@@ -269,7 +269,9 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </div>
-            </div>
+            </div> -->
+            <!-- Pagination (AJAX) -->
+            <div class="paginationBar--ajax" id="paginationBar"></div>
         <?php endif; ?>
     </div>
 </div>

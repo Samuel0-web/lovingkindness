@@ -66,6 +66,36 @@ const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
 let programValue = '';
 let statusValue = '';
 let enrollmentCards = document.querySelectorAll('.enrollmentCard');
+let currentPage = 1;
+let totalPages = 1;
+const limit = 12;
+
+// ========== EVENT DELEGATION ==========
+enrollmentGrid.addEventListener('click', (e) => {
+    // View button
+    const viewBtn = e.target.closest('.viewBtn');
+    if (viewBtn) {
+        e.preventDefault();
+        const id = viewBtn.dataset.id;
+        openEnrollmentDetail(id);
+        return;
+    }
+    
+    // Delete button
+    const deleteBtn = e.target.closest('.deleteBtn');
+    if (deleteBtn) {
+        e.preventDefault();
+        handleDeleteClick({ currentTarget: deleteBtn });
+        return;
+    }
+});
+
+// Bulk checkbox delegation
+enrollmentGrid.addEventListener('change', (e) => {
+    if (!e.target.matches('.bulkCheckbox__input')) return;
+    e.stopPropagation();
+    handleCheckboxChange(e);
+});
 
 // ========== HELPER FUNCTIONS ==========
 function escapeHtml(str) {
@@ -91,21 +121,58 @@ function formatStatus(status) {
     return statusMap[status] || status;
 }
 
+// ========== REUSABLE HELPERS ==========
+const getVisibleCards = () => {
+    return [...document.querySelectorAll('.enrollmentCard')].filter(c => {
+        return c.style.display !== 'none' && c.offsetParent !== null;
+    });
+};
+
+const saveFilters = () => {
+    try {
+        localStorage.setItem('enrollmentFilters', JSON.stringify({
+            search: searchInput?.value || '',
+            program: programValue,
+            status: statusValue,
+            page: currentPage
+        }));
+    } catch (e) { /* ignore */ }
+};
+
+const restoreFilters = () => {
+    try {
+        const saved = JSON.parse(localStorage.getItem('enrollmentFilters'));
+        if (!saved) return false;
+        if (saved.search && searchInput) searchInput.value = saved.search;
+        if (saved.program) {
+            programValue = saved.program;
+            const pt = document.querySelector('#programDropdown .uiDropdownTrigger');
+            if (pt) {
+                pt.dataset.value = saved.program;
+                pt.childNodes[0].textContent = (saved.program === 'tutoring' ? 'Tutoring' : 'Teacher Training') + ' ';
+            }
+        }
+        if (saved.status) {
+            statusValue = saved.status;
+            const st = document.querySelector('#statusDropdown .uiDropdownTrigger');
+            if (st) {
+                st.dataset.value = saved.status;
+                const labels = { pending: 'Pending', contacted: 'Contacted', consultation_booked: 'Consultation', enrolled: 'Enrolled', rejected: 'Rejected' };
+                st.childNodes[0].textContent = (labels[saved.status] || 'All Statuses') + ' ';
+            }
+        }
+        if (saved.page) currentPage = saved.page;
+        return true;
+    } catch (e) { return false; }
+};
+
 let searchDebounce;
 
 const fetchEnrollments = async () => {
     const search = searchInput?.value || '';
     const program = programValue;
     const status = statusValue;
-
-    // Save filters to localStorage
-    try {
-        localStorage.setItem('enrollmentFilters', JSON.stringify({
-            search: searchInput?.value || '',
-            program: programValue,
-            status: statusValue
-        }));
-    } catch (e) { /* ignore */ }
+    saveFilters();
 
     try {
         resetFocusedCard();
@@ -121,7 +188,9 @@ const fetchEnrollments = async () => {
             action: 'search',
             search,
             program,
-            status
+            status,
+            page: currentPage,
+            limit: limit
         });
 
         const res = await fetch(`api/enrollment?${params}`, {
@@ -134,7 +203,11 @@ const fetchEnrollments = async () => {
         if (!data.ok) { throw new Error(data.e || 'Failed'); }
         // Clear bulk selection on new data
         selectedIds.clear();
+        lastCheckedId = null;
         updateBulkUI();
+        totalPages = data.totalPages || 1;
+        currentPage = data.page || 1;
+        renderPagination();
         renderEnrollmentCards(data.enrollments);
     } catch (err) {
         enrollmentGrid.innerHTML = `
@@ -170,7 +243,7 @@ const renderEnrollmentCards = (enrollments) => {
             .toUpperCase();
 
         return `
-            <div class="enrollmentCard" data-id="${enrollment.id}">
+            <div class="enrollmentCard" data-id="${enrollment.id}" tabindex="0">
                 <label class="bulkCheckbox" data-id="${enrollment.id}">
                     <input type="checkbox" class="bulkCheckbox__input" data-id="${enrollment.id}">
                     <span class="bulkCheckbox__visual">
@@ -284,28 +357,45 @@ const renderEnrollmentCards = (enrollments) => {
         `;
 
     }).join('');
-
-    attachViewHandlers();
-    attachDeleteHandlers();
-    attachBulkCheckboxes();
     
-    // Stagger animation on cards
-    requestAnimationFrame(() => {
-        document.querySelectorAll('.enrollmentCard').forEach((card, i) => {
-            card.style.animationDelay = `${i * 25}ms`;
-            card.classList.add('enrollmentCard--animate-in');
-        });
-    });
+    // Progressive rendering with capped stagger
+    const cards = document.querySelectorAll('.enrollmentCard');
+    const batchSize = 6;
+    let batchIndex = 0;
+
+    const showBatch = () => {
+        const start = batchIndex * batchSize;
+        const end = Math.min(start + batchSize, cards.length);
+        
+        for (let i = start; i < end; i++) {
+            cards[i].style.animationDelay = `${Math.min((i - start) * 25, 300)}ms`;
+            cards[i].classList.add('enrollmentCard--animate-in');
+        }
+        
+        batchIndex++;
+        if (batchIndex * batchSize < cards.length) {
+            requestAnimationFrame(() => {
+                setTimeout(showBatch, 50);
+            });
+        }
+    };
+
+    requestAnimationFrame(showBatch);
 };
 
 const updateStatusDropdown = async (trigger, newStatus) => {
     const id = trigger.dataset.id;
     const oldStatus = trigger.dataset.value;
-    if (oldStatus === newStatus) { return; }
+    const oldHTML = trigger.innerHTML;
+    if (oldStatus === newStatus) return;
+
+    // Optimistic update
+    trigger.dataset.value = newStatus;
+    trigger.dataset.current = newStatus;
+    trigger.innerHTML = `${formatStatus(newStatus)} <i class="fas fa-chevron-down"></i>`;
+    trigger.disabled = true;
 
     try {
-        trigger.disabled = true;
-
         const res = await fetch('api/enrollment?action=updateStatus', {
             method: 'POST',
             headers: {
@@ -313,27 +403,17 @@ const updateStatusDropdown = async (trigger, newStatus) => {
                 'X-CSRF-Token': window.csrfToken,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                id,
-                status: newStatus
-            })
-            
+            body: JSON.stringify({ id, status: newStatus })
         });
 
         const data = await res.json();
-        if (!data.ok) { throw new Error(data.e || 'Update failed'); }
-
-        trigger.dataset.value = newStatus;
-        trigger.dataset.current = newStatus;
-
-        trigger.innerHTML = `
-            ${formatStatus(newStatus)}
-            <i class="fas fa-chevron-down"></i>
-        `;
-
+        if (!data.ok) throw new Error(data.e || 'Update failed');
         UI.toastSuccess('Status updated');
-
     } catch (err) {
+        // Revert on failure
+        trigger.dataset.value = oldStatus;
+        trigger.dataset.current = oldStatus;
+        trigger.innerHTML = oldHTML;
         UI.toastError(err.message || 'Failed to update status');
     } finally {
         trigger.disabled = false;
@@ -361,6 +441,7 @@ document.querySelector('#programDropdown .uiDropdownTrigger')
     ?.addEventListener('dropdown:change', e => {
 
         programValue = e.detail.value;
+        currentPage = 1;
         fetchEnrollments();
 
 });
@@ -369,14 +450,16 @@ document.querySelector('#statusDropdown .uiDropdownTrigger')
     ?.addEventListener('dropdown:change', e => {
 
         statusValue = e.detail.value;
+        currentPage = 1;
         fetchEnrollments();
 });
 
 const handleSearchInput = () => {
     clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => { fetchEnrollments(); }, 300);
+    currentPage = 1;
     selectedIds.clear();
     updateBulkUI();
+    searchDebounce = setTimeout(() => { fetchEnrollments(); }, 300);
 };
 
 searchInput?.addEventListener('input', handleSearchInput);
@@ -394,6 +477,7 @@ resetBtn?.addEventListener('click', () => {
 
     // Clear localStorage
     try { localStorage.removeItem('enrollmentFilters'); } catch (e) { /* ignore */ }
+    currentPage = 1;
     fetchEnrollments();
 });
 
@@ -445,6 +529,16 @@ function getEmptyState() {
 
 // Command + K shortcut
 document.addEventListener('keydown', (e) => {
+    // Ignore shortcuts when typing in form elements
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    const isFormElement = tag === 'input' || tag === 'textarea' || tag === 'select' || 
+                          document.activeElement?.isContentEditable;
+    
+    // Allow Escape and Ctrl/Cmd+K always
+    if (isFormElement && e.key !== 'Escape' && !((e.metaKey || e.ctrlKey) && e.key === 'k')) {
+        return;
+    }
+    
     // Ctrl/Cmd + A: Select all cards (when search is NOT focused)
     if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
         if (document.activeElement !== searchInput) {
@@ -467,14 +561,12 @@ document.addEventListener('keydown', (e) => {
 // ========== KEYBOARD NAVIGATION ==========
 let focusedCardIndex = -1;
 
-const getVisibleCards = () => {
-    return [...document.querySelectorAll('.enrollmentCard')].filter(c => {
-        const style = c.style.display || getComputedStyle(c).display;
-        return style !== 'none';
-    });
-};
-
 document.addEventListener('keydown', (e) => {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    const isFormElement = tag === 'input' || tag === 'textarea' || tag === 'select' || 
+                          document.activeElement?.isContentEditable;
+    if (isFormElement && e.key !== 'Escape') return;
+    
     const visibleCards = getVisibleCards();
     if (!visibleCards.length) return;
     
@@ -541,6 +633,61 @@ const resetFocusedCard = () => {
     focusedCardIndex = -1;
     document.querySelectorAll('.enrollmentCard--focused').forEach(c => {
         c.classList.remove('enrollmentCard--focused');
+    });
+};
+
+// ========== AJAX PAGINATION ==========
+const renderPagination = () => {
+    const bar = document.getElementById('paginationBar');
+    if (!bar || totalPages <= 1) {
+        if (bar) bar.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Previous
+    html += `<button class="paginationBar__page ${currentPage <= 1 ? 'paginationBar__page--disabled' : ''}" 
+        data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''}>
+        <i class="fas fa-chevron-left"></i></button>`;
+    
+    // Page numbers
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    
+    if (start > 1) {
+        html += `<button class="paginationBar__page" data-page="1">1</button>`;
+        if (start > 2) html += `<span class="paginationBar__page paginationBar__page--disabled">...</span>`;
+    }
+    
+    for (let i = start; i <= end; i++) {
+        html += `<button class="paginationBar__page ${i === currentPage ? 'paginationBar__page--active' : ''}" 
+            data-page="${i}">${i}</button>`;
+    }
+    
+    if (end < totalPages) {
+        if (end < totalPages - 1) html += `<span class="paginationBar__page paginationBar__page--disabled">...</span>`;
+        html += `<button class="paginationBar__page" data-page="${totalPages}">${totalPages}</button>`;
+    }
+    
+    // Next
+    html += `<button class="paginationBar__page ${currentPage >= totalPages ? 'paginationBar__page--disabled' : ''}" 
+        data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''}>
+        <i class="fas fa-chevron-right"></i></button>`;
+    
+    bar.innerHTML = html;
+    
+    // Event delegation for page clicks
+    bar.querySelectorAll('[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = parseInt(btn.dataset.page);
+            if (page && page !== currentPage) {
+                currentPage = page;
+                saveFilters();
+                fetchEnrollments();
+                enrollmentGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     });
 };
 
@@ -668,30 +815,25 @@ const showDetailContent = (enrollment, container) => {
     `;
 };
 
-// ========== AJAX DELETE (NO PAGE RELOAD) ==========
-const attachDeleteHandlers = () => {
-    const deleteBtns = document.querySelectorAll('.deleteBtn');
-    deleteBtns.forEach(btn => {
-        btn.removeEventListener('click', handleDeleteClick);
-        btn.addEventListener('click', handleDeleteClick);
-    });
-};
-
 // ========== BULK SELECTION ==========
 const updateBulkUI = () => {
     const count = selectedIds.size;
     
-    if (bulkCountEl) {
-        bulkCountEl.textContent = `✓ ${count} selected`;
+    // Re-query in case DOM changed
+    const bar = document.getElementById('bulkActionBar');
+    const countEl = document.getElementById('bulkCount');
+    const selectAllBtn = document.getElementById('bulkSelectAllBtn');
+    
+    if (countEl) {
+        countEl.innerHTML = `<i class="fas fa-check-circle"></i> ${count} selected`;
     }
     
-    // Show/hide bulk bar
     if (count > 0) {
-        bulkActionBar?.classList.add('bulkActionBar--visible');
+        bar?.classList.add('bulkActionBar--visible');
     } else {
-        bulkActionBar?.classList.remove('bulkActionBar--visible');
+        bar?.classList.remove('bulkActionBar--visible');
         allSelected = false;
-        if (bulkSelectAllBtn) bulkSelectAllBtn.textContent = 'Select All';
+        if (selectAllBtn) selectAllBtn.textContent = 'Select All';
     }
     
     // Toggle bulk mode on cards
@@ -762,13 +904,6 @@ const handleCheckboxChange = (e) => {
     updateBulkUI();
 };
 
-const attachBulkCheckboxes = () => {
-    document.querySelectorAll('.bulkCheckbox__input').forEach(cb => {
-        cb.removeEventListener('change', handleCheckboxChange);
-        cb.addEventListener('change', handleCheckboxChange);
-    });
-};
-
 // Clear selection
 // Select All / Deselect All
 const bulkSelectAllBtn = document.getElementById('bulkSelectAllBtn');
@@ -802,21 +937,47 @@ bulkClearBtn?.addEventListener('click', () => {
 });
 
 // Bulk status change via uiDropdown
-document.querySelector('#bulkStatusDropdown .uiDropdownTrigger')?.addEventListener('dropdown:change', (e) => {
+document.querySelector('#bulkStatusDropdown .uiDropdownTrigger')?.addEventListener('dropdown:change', async (e) => {
     const newStatus = e.detail.value;
     if (!newStatus || selectedIds.size === 0) return;
     
-    // Backend logic placeholder
-    console.log('Bulk status change:', [...selectedIds], 'to', newStatus);
-    UI.toastSuccess(`Status updated for ${selectedIds.size} enrollments`);
+    const ids = [...selectedIds];
     
-    selectedIds.clear();
-    updateBulkUI();
-    
-    // Reset dropdown display
-    const trigger = document.querySelector('#bulkStatusDropdown .uiDropdownTrigger');
-    if (trigger) {
-        trigger.childNodes[0].textContent = 'Change Status ';
+    try {
+        const res = await fetch('api/enrollment?action=bulkStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ ids, status: newStatus })
+        });
+        
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.e || 'Bulk update failed');
+        
+        // Update affected cards immediately
+        ids.forEach(id => {
+            const card = document.querySelector(`.enrollmentCard[data-id="${id}"]`);
+            if (card) {
+                const trigger = card.querySelector('.statusTrigger');
+                if (trigger) {
+                    trigger.dataset.value = newStatus;
+                    trigger.dataset.current = newStatus;
+                    trigger.innerHTML = `${formatStatus(newStatus)} <i class="fas fa-chevron-down"></i>`;
+                }
+            }
+        });
+        
+        UI.toastSuccess(`Status updated for ${ids.length} enrollments`);
+        selectedIds.clear();
+        updateBulkUI();
+        
+        const trigger = document.querySelector('#bulkStatusDropdown .uiDropdownTrigger');
+        if (trigger) trigger.childNodes[0].textContent = 'Change Status ';
+    } catch (err) {
+        UI.toastError(err.message || 'Bulk status update failed');
     }
 });
 
@@ -865,22 +1026,16 @@ const handleDeleteClick = async (e) => {
         
         if (data.ok) {
             UI.toastSuccess('Enrollment deleted successfully');
-
-            // Animate card out before removing
+            selectedIds.delete(id);
+            updateBulkUI();
+            
             card.classList.add('enrollmentCard--removing');
             card.addEventListener('transitionend', () => {
                 card.remove();
-                if (!document.querySelector('.enrollmentCard')) {
+                if (!document.querySelector('.enrollmentCard:not(.enrollmentCard--removing)')) {
                     enrollmentGrid.innerHTML = getEmptyState();
                 }
             }, { once: true });
-
-            if (!document.querySelector('.enrollmentCard')) {
-                enrollmentGrid.innerHTML = getEmptyState();
-            }
-            attachDeleteHandlers();
-            attachBulkCheckboxes();
-            enrollmentCards = document.querySelectorAll('.enrollmentCard');
         } else {
             UI.toastError(data.e || 'Delete failed');
         }
@@ -1056,47 +1211,12 @@ const handleViewClick = async (e) => {
     await openEnrollmentDetail(id);
 };
 
-const attachViewHandlers = () => {
-    const viewBtns = document.querySelectorAll('.viewBtn');
-    viewBtns.forEach(btn => {
-        btn.removeEventListener('click', handleViewClick);
-        btn.addEventListener('click', handleViewClick);
-    });
-};
-
-// ========== INITIALIZE ==========
 // ========== INITIALIZE ==========
 const init = () => {
-    // Restore filters from localStorage
-    try {
-        const saved = JSON.parse(localStorage.getItem('enrollmentFilters'));
-        if (saved) {
-            if (saved.search && searchInput) searchInput.value = saved.search;
-            if (saved.program) {
-                programValue = saved.program;
-                const programTrigger = document.querySelector('#programDropdown .uiDropdownTrigger');
-                if (programTrigger) {
-                    programTrigger.dataset.value = saved.program;
-                    const label = saved.program === 'tutoring' ? 'Tutoring' : 'Teacher Training';
-                    programTrigger.childNodes[0].textContent = label + ' ';
-                }
-            }
-            if (saved.status) {
-                statusValue = saved.status;
-                const statusTrigger = document.querySelector('#statusDropdown .uiDropdownTrigger');
-                if (statusTrigger) {
-                    statusTrigger.dataset.value = saved.status;
-                    const statusLabels = { pending: 'Pending', contacted: 'Contacted', consultation_booked: 'Consultation', enrolled: 'Enrolled', rejected: 'Rejected' };
-                    statusTrigger.childNodes[0].textContent = (statusLabels[saved.status] || 'All Statuses') + ' ';
-                }
-            }
-            fetchEnrollments();
-        }
-    } catch (e) { /* ignore */ }
-    
-    attachViewHandlers();
-    attachDeleteHandlers();
-    attachBulkCheckboxes();
+    const restored = restoreFilters();
+    if (restored) {
+        fetchEnrollments();
+    }
 };
 
 if (document.readyState === 'loading') {

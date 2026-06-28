@@ -19,15 +19,21 @@
     align-items: center;
     gap: 16px;
     overflow: visible !important;
-    position: relative;
+    position: sticky;
+    top: 12px;
     z-index: 1000;
     flex-wrap: wrap;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    transition: box-shadow 0.2s ease;
+}
+
+.controlDock--stuck {
+    box-shadow: var(--shadow-lg);
 }
 
 html[data-theme="dark"] .controlDock {
-    background: rgba(28, 28, 30, 0.95);
+    background: #1c1c1ef2;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
@@ -43,6 +49,8 @@ html[data-theme="dark"] .controlDock {
     gap: 12px;
     flex-wrap: wrap;
     box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 1000;
     max-height: 0;
     opacity: 0;
     visibility: hidden;
@@ -69,52 +77,38 @@ html[data-theme="dark"] .controlDock {
     white-space: nowrap;
 }
 
-.bulkActionBar__clear {
-    padding: 8px 14px;
-    background: transparent;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
+.bulkActionBar__count i {
+    color: var(--brand-green);
     font-size: 12px;
-    font-weight: 500;
-    color: var(--gray-600);
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
 }
 
-.bulkActionBar__clear:hover {
-    background: var(--gray-100);
-}
-
-.bulkActionBar__dropdown {
-    padding: 8px 14px;
-    background: var(--white);
+.bulkActionBar__clear {
+    padding: 12px 15px;
+    background: var(--gray-300);
     border: 1px solid var(--gray-200);
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 12px;
     font-weight: 500;
     color: var(--gray-700);
     cursor: pointer;
-    transition: var(--transition);
+    transition: background .3s ease;
     white-space: nowrap;
-    min-width: 130px;
 }
 
-.bulkActionBar__dropdown:hover {
-    border-color: var(--gray-300);
-    background: var(--gray-50);
+.bulkActionBar__clear:hover, .bulkActionBar__dropdown:hover {
+    background: var(--gray-400);
 }
 
 .bulkActionBar__delete {
-    padding: 8px 16px;
+    padding: 12px 15px;
     background: #ef4444;
     border: none;
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 12px;
     font-weight: 600;
     color: var(--gray-900);
     cursor: pointer;
-    transition: var(--transition);
+    transition: background .3s ease;
     white-space: nowrap;
 }
 
@@ -242,7 +236,12 @@ html[data-theme="dark"] .controlDock {
 }
 
 .enrollmentCard:has(.statusDropdown.open) {
-    z-index: 1500;
+    z-index: 1500 !important;
+}
+
+.statusDropdown .uiDropdownMenu {
+    position: absolute;
+    z-index: 1600;
 }
 
 .bulkCheckbox {
@@ -284,7 +283,7 @@ html[data-theme="dark"] .controlDock {
 
 .bulkCheckbox__visual i {
     font-size: 10px;
-    color: white;
+    color: var(--gray-900);
     opacity: 0;
     transition: opacity 0.1s ease;
 }
@@ -1071,7 +1070,7 @@ html[data-theme="dark"] .statusSelect {
 .detailNavBtn:hover:not(:disabled) {
     background: var(--brand-green);
     border-color: var(--brand-green);
-    color: white;
+    color: var(--gray-900);
 }
 
 .detailNavBtn:disabled {
@@ -1081,6 +1080,53 @@ html[data-theme="dark"] .statusSelect {
 
 .drawerHeader .detailNav {
     margin-left: auto;
+}
+
+.paginationBar--ajax {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.paginationBar__pages {
+    display: flex;
+    gap: 4px;
+}
+
+.paginationBar__page {
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.paginationBar__page:hover:not(.paginationBar__page--active) {
+    background: var(--gray-100);
+}
+
+.paginationBar__page--active {
+    background: var(--brand-green);
+    border-color: var(--brand-green);
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+.paginationBar__page--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .modalBody::-webkit-scrollbar{
