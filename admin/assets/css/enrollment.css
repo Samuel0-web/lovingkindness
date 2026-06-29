@@ -616,53 +616,6 @@ html[data-theme="dark"] .controlDock {
     border-top: 1px solid var(--gray-200);
 }
 
-.paginationInfo {
-    font-size: 13px;
-    color: var(--gray-600);
-}
-
-.paginationInfo strong {
-    font-weight: 600;
-    color: var(--gray-800);
-}
-
-.paginationControls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.pageBtn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    color: var(--gray-700);
-    transition: var(--transition);
-    text-decoration: none;
-}
-
-.pageBtn:hover:not(.disabled) {
-    background: var(--brand-green);
-    border-color: var(--brand-green);
-    color: var(--gray-900);
-}
-
-.pageBtn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.pageIndicator {
-    font-size: 13px;
-    color: var(--gray-600);
-}
-
 .premiumModal {
     display: none;
     position: fixed;

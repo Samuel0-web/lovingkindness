@@ -1,48 +1,45 @@
-// ========== PREMIUM ENROLLMENT MANAGER ==========
-// Complete rewrite with AJAX frontend filtering, status updates, and swipe-to-close drawer
-
-// ========== DEVICE PARSING UTILITY ==========
-const parseUserAgent = (uaString) => {
-    const ua = uaString || '';
-    
-    // Browser detection
+const parseUserAgent = (uaString = '') => {
+    const ua = uaString;
     let browser = 'Unknown';
     let browserVersion = '';
-    if (ua.includes('Edg/')) {
-        browser = 'Edge';
-        const match = ua.match(/Edg\/(\d+)/);
-        if (match) browserVersion = match[1];
-    }  else if (ua.includes('Chrome/')) {
-        browser = 'Chrome';
-        const match = ua.match(/Chrome\/(\d+)/);
-        if (match) browserVersion = match[1];
-    } else if (ua.includes('Firefox/')) {
-        browser = 'Firefox';
-        const match = ua.match(/Firefox\/(\d+)/);
-        if (match) browserVersion = match[1];
-    } else if (ua.includes('Safari/') && !ua.includes('Chrome')) {
-        browser = 'Safari';
-        const match = ua.match(/Version\/(\d+)/);
-        if (match) browserVersion = match[1];
+
+    const browserRules = [
+        { name: 'Edge', regex: /Edg\/(\d+)/ },
+        { name: 'Opera', regex: /OPR\/(\d+)/ },
+        { name: 'Brave', regex: /Brave\/(\d+)/ },
+        { name: 'Vivaldi', regex: /Vivaldi\/(\d+)/ },
+        { name: 'Samsung Internet', regex: /SamsungBrowser\/(\d+)/ },
+        { name: 'DuckDuckGo Browser', regex: /DuckDuckGo\/(\d+)/ },
+        { name: 'Arc', regex: /Arc\/(\d+)/ },
+        { name: 'Firefox', regex: /Firefox\/(\d+)/ },
+        { name: 'Chrome', regex: /Chrome\/(\d+)/ },
+        { name: 'Safari', regex: /Version\/(\d+).+Safari/ }
+    ];
+
+    for (const rule of browserRules) {
+        const match = ua.match(rule.regex);
+        if (match) {
+            browser = rule.name;
+            browserVersion = match[1];
+            break;
+        }
     }
-    
-    // OS detection
+
     let os = 'Unknown';
-    if (ua.includes('Windows NT 10.0')) os = 'Windows 11/10';
-    else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
-    else if (ua.includes('Mac OS X')) os = 'macOS';
-    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-    else if (ua.includes('Android')) os = 'Android';
-    else if (ua.includes('Linux')) os = 'Linux';
-    
-    // Device type
+    if (/Windows NT 10\.0/.test(ua)) os = 'Windows 10/11';
+    else if (/Windows NT 6\.3/.test(ua)) os = 'Windows 8.1';
+    else if (/Windows NT 6\.2/.test(ua)) os = 'Windows 8';
+    else if (/Windows NT 6\.1/.test(ua)) os = 'Windows 7';
+    else if (/Windows NT 6\.0/.test(ua)) os = 'Windows Vista';
+    else if (/Windows NT 5\.1/.test(ua)) os = 'Windows XP';
+    else if (/Android/.test(ua)) os = 'Android';
+    else if (/(iPhone|iPad|iPod)/.test(ua)) os = 'iOS';
+    else if (/Mac OS X/.test(ua)) os = 'macOS';
+    else if (/CrOS/.test(ua)) os = 'ChromeOS';
+    else if (/Linux/.test(ua)) os = 'Linux';
     let deviceType = 'Desktop';
-    if (ua.includes('iPad')) {
-        deviceType = 'Tablet';
-    } else if (ua.includes('Mobile')) {
-        deviceType = 'Mobile';
-    }
-    
+    if (/iPad|Tablet/.test(ua)) deviceType = 'Tablet';
+    else if (/Mobile|iPhone|Android/.test(ua)) deviceType = 'Mobile';
     return { browser, browserVersion, os, deviceType };
 };
 
@@ -178,10 +175,11 @@ const fetchEnrollments = async () => {
         resetFocusedCard();
         enrollmentGrid.innerHTML = `
             <div class="emptyState">
-            <svg class="loadingSpinner" viewBox="25 25 50 50">
-                <circle class="path" cx="50" cy="50" r="20"></circle>
-            </svg>
-        </div>
+                <svg class="loadingSpinner" viewBox="25 25 50 50">
+                    <circle class="path" cx="50" cy="50" r="20"></circle>
+                </svg>
+                <h3>Loading...</h3>
+            </div>
         `;
 
         const params = new URLSearchParams({
@@ -212,7 +210,10 @@ const fetchEnrollments = async () => {
     } catch (err) {
         enrollmentGrid.innerHTML = `
             <div class="emptyState">
-                <h3>Failed to load enrollments</h3>
+                <div class="emptyIcon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h3>Failed to load enrollments, please try again</h3>
             </div>
         `;
     }
@@ -984,20 +985,54 @@ document.querySelector('#bulkStatusDropdown .uiDropdownTrigger')?.addEventListen
 // Bulk delete
 bulkDeleteBtn?.addEventListener('click', async () => {
     if (selectedIds.size === 0) return;
-    
+
     const confirmed = await UI.confirmDelete(
         `This will permanently delete ${selectedIds.size} enrollment record(s). This action cannot be undone.`,
         'Bulk Delete?'
     );
-    
+
     if (!confirmed) return;
-    
-    // Backend logic placeholder
-    console.log('Bulk delete:', [...selectedIds]);
-    UI.toastSuccess(`${selectedIds.size} enrollments deleted`);
-    
-    selectedIds.clear();
-    updateBulkUI();
+
+    const ids = [...selectedIds];
+
+    try {
+        const res = await fetch('api/enrollment?action=bulkDelete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ ids })
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.e || 'Bulk delete failed');
+
+        UI.toastSuccess(`${data.deleted} enrollment${data.deleted !== 1 ? 's' : ''} deleted`);
+
+        // Animate out each deleted card
+        ids.forEach(id => {
+            const card = document.querySelector(`.enrollmentCard[data-id="${id}"]`);
+            if (!card) return;
+
+            card.classList.add('enrollmentCard--removing');
+            card.addEventListener('transitionend', () => {
+                card.remove();
+                // If grid is now empty, show empty state
+                if (!document.querySelector('.enrollmentCard:not(.enrollmentCard--removing)')) {
+                    enrollmentGrid.innerHTML = getEmptyState();
+                }
+            }, { once: true });
+        });
+
+        selectedIds.clear();
+        lastCheckedId = null;
+        updateBulkUI();
+
+    } catch (err) {
+        UI.toastError(err.message || 'Bulk delete failed');
+    }
 });
 
 const handleDeleteClick = async (e) => {
@@ -1213,10 +1248,8 @@ const handleViewClick = async (e) => {
 
 // ========== INITIALIZE ==========
 const init = () => {
-    const restored = restoreFilters();
-    if (restored) {
-        fetchEnrollments();
-    }
+    restoreFilters();
+    fetchEnrollments();
 };
 
 if (document.readyState === 'loading') {

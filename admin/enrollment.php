@@ -8,66 +8,18 @@ if (!$adminId) {
     exit;
 }
 
-// Pagination
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 12;
-$offset = ($page - 1) * $limit;
-
-// Filters
-$program = $_GET['program'] ?? '';
-$status = $_GET['status'] ?? '';
-$search = $_GET['search'] ?? '';
-
-// Build query
-$where = [];
-$params = [];
-
-if ($program) {
-    $where[] = "program = ?";
-    $params[] = $program;
-}
-if ($status) {
-    $where[] = "status = ?";
-    $params[] = $status;
-}
-if ($search) {
-    $where[] = "(full_name LIKE ? OR email LIKE ? OR phone LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-}
-
-$whereClause = $where ? "WHERE " . implode(" AND ", $where) : "";
-
-// Count total
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM enrollments $whereClause");
-$countStmt->execute($params);
-$total = $countStmt->fetchColumn();
-$totalPages = ceil($total / $limit);
-
-// Fetch enrollments
-$stmt = $pdo->prepare("
-    SELECT * FROM enrollments 
-    $whereClause 
-    ORDER BY created_at DESC 
-    LIMIT " . (int)$limit . "
-    OFFSET " . (int)$offset
-);
-$stmt->execute($params);
-$enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$search = trim($_GET['search'] ?? '');
 ?>
 
 <link rel="stylesheet" href="assets/css/enrollment.css?<?= filemtime('assets/css/enrollment.css') ?>">
 
 <div class="enrollmentManager">
     <div class="managerContainer">
-
-        <!-- Floating Control Dock -->
         <div class="controlDock" id="controlDock">
             <div class="dockSearch">
                 <i class="fas fa-search"></i>
                 <input type="text" class="formInput" id="searchInput" placeholder="Search by name, email, or phone..." value="<?= htmlspecialchars($search) ?>">
-                <kbd class="searchShortcut">⌘K</kbd>
+                <kbd class="searchShortcut">&#8984;K</kbd>
             </div>
             <div class="dockFilters">
                 <div class="uiDropdown" id="programDropdown">
@@ -104,7 +56,6 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-        <!-- Bulk Action Bar -->
         <div class="bulkActionBar" id="bulkActionBar">
             <span class="bulkActionBar__count" id="bulkCount"><i class="fas fa-check-circle"></i> 0 selected</span>
             <button type="button" class="bulkActionBar__clear" id="bulkClearBtn">Clear Selection</button>
@@ -126,157 +77,18 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="button" class="bulkActionBar__delete" id="bulkDeleteBtn">Delete</button>
         </div>
 
-        <!-- Enrollment Grid -->
         <div class="enrollmentGrid">
-            <?php if (empty($enrollments)): ?>
-                <div class="emptyState">
-                    <div class="emptyIcon">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-
-                    <h3>No enrollments yet</h3>
-
-                    <p>
-                        New enrollment submissions will appear here automatically.
-                    </p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($enrollments as $enrollment): 
-                    $initials = strtoupper(substr($enrollment['full_name'], 0, 1));
-                    if (strpos($enrollment['full_name'], ' ') !== false) {
-                        $parts = explode(' ', $enrollment['full_name']);
-                        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
-                    }
-                    $createdDate = new DateTime($enrollment['created_at']);
-                    $now = new DateTime();
-                    $interval = $createdDate->diff($now);
-                    $timeAgo = '';
-                    if ($interval->days > 7) {
-                        $timeAgo = $createdDate->format('M d, Y');
-                    } elseif ($interval->days > 0) {
-                        $timeAgo = $interval->days . ' days ago';
-                    } elseif ($interval->h > 0) {
-                        $timeAgo = $interval->h . ' hours ago';
-                    } else {
-                        $timeAgo = 'Just now';
-                    }
-                ?>
-                <div class="enrollmentCard" data-id="<?= $enrollment['id'] ?>">
-                    <label class="bulkCheckbox" data-id="<?= $enrollment['id'] ?>">
-                        <input type="checkbox" class="bulkCheckbox__input" data-id="<?= $enrollment['id'] ?>">
-                        <span class="bulkCheckbox__visual">
-                            <i class="fas fa-check"></i>
-                        </span>
-                    </label>
-                    <div class="cardHeader">
-                        <div class="enrolleeInfo">
-                            <div class="enrolleeAvatar"><?= $initials ?></div>
-                            <div class="enrolleeDetails">
-                                <h4><?= htmlspecialchars($enrollment['full_name']) ?></h4>
-                                <span class="enrolleeId">#<?= $enrollment['id'] ?></span>
-                            </div>
-                        </div>
-                        <div class="cardActions">
-                            <button class="actionIcon viewBtn" data-id="<?= $enrollment['id'] ?>" title="View Details">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="actionIcon deleteBtn" data-id="<?= $enrollment['id'] ?>" title="Delete">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="cardBody">
-                        <div class="infoRow">
-                            <span class="infoLabel">Program</span>
-                            <span class="programBadge <?= $enrollment['program'] == 'tutoring' ? 'tutoring' : 'training' ?>">
-                                <?= $enrollment['program'] == 'tutoring' ? 'Tutoring' : 'Teacher Training' ?>
-                            </span>
-                        </div>
-                        <div class="infoRow">
-                            <span class="infoLabel">Contact</span>
-                            <div class="contactInfo">
-                                <span class="contactEmail"><?= htmlspecialchars($enrollment['email']) ?></span>
-                                <span class="contactPhone"><?= htmlspecialchars($enrollment['phone']) ?></span>
-                            </div>
-                        </div>
-                        <?php if ($enrollment['program'] == 'tutoring'): ?>
-                        <div class="infoRow">
-                            <span class="infoLabel">Student</span>
-                            <span class="infoValue"><?= htmlspecialchars($enrollment['student_name']) ?> (Grade <?= htmlspecialchars($enrollment['grade']) ?>)</span>
-                        </div>
-                        <div class="infoRow">
-                            <span class="infoLabel">Subject</span>
-                            <span class="infoValue"><?= htmlspecialchars($enrollment['subject']) ?></span>
-                        </div>
-                        <?php else: ?>
-                        <div class="infoRow">
-                            <span class="infoLabel">Note</span>
-                            <span class="infoValue"><?= htmlspecialchars(substr($enrollment['additional_info'] ?? 'No additional info', 0, 60)) ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <div class="infoRow">
-                            <span class="infoLabel">Schedule</span>
-                            <span class="scheduleValue"><?= htmlspecialchars($enrollment['preferred_time']) ?></span>
-                        </div>
-                    </div>
-                    <div class="cardFooter">
-                        <div class="statusWrapper">
-                            <div class="uiDropdown statusDropdown">
-                                <button class="uiDropdownTrigger statusTrigger"
-                                    data-id="<?= $enrollment['id'] ?>"
-                                    data-current="<?= $enrollment['status'] ?>"
-                                    data-value="<?= $enrollment['status'] ?>"
-                                >
-                                    <?= ucfirst(str_replace('_', ' ', $enrollment['status'])) ?>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-
-                                <div class="uiDropdownMenu">
-                                    <button data-value="pending">Pending</button>
-                                    <button data-value="contacted">Contacted</button>
-                                    <button data-value="consultation_booked">Consultation</button>
-                                    <button data-value="enrolled">Enrolled</button>
-                                    <button data-value="rejected">Rejected</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cardMeta">
-                            <span class="dateChip">
-                                <i class="far fa-calendar-alt"></i>
-                                <?= $timeAgo ?>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+            <div class="emptyState">
+                <svg class="loadingSpinner" viewBox="25 25 50 50">
+                    <circle class="path" cx="50" cy="50" r="20"></circle>
+                </svg>
+            </div>
         </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-            <!-- <div class="paginationBar">
-                <div class="paginationInfo">
-                    Showing <strong><?= $offset + 1 ?></strong> – <strong><?= min($offset + $limit, $total) ?></strong> of <strong><?= number_format($total) ?></strong>
-                </div>
-                <div class="paginationControls">
-                    <a href="?page=<?= max(1, $page - 1) ?>&program=<?= urlencode($program) ?>&status=<?= urlencode($status) ?>&search=<?= urlencode($search) ?>" 
-                       class="pageBtn <?= $page <= 1 ? 'disabled' : '' ?>">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    <span class="pageIndicator"><?= $page ?> / <?= $totalPages ?></span>
-                    <a href="?page=<?= min($totalPages, $page + 1) ?>&program=<?= urlencode($program) ?>&status=<?= urlencode($status) ?>&search=<?= urlencode($search) ?>" 
-                       class="pageBtn <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </div>
-            </div> -->
-            <!-- Pagination (AJAX) -->
-            <div class="paginationBar--ajax" id="paginationBar"></div>
-        <?php endif; ?>
+        <div class="paginationBar--ajax" id="paginationBar"></div>
     </div>
 </div>
 
-<!-- Premium Modal (Desktop) -->
 <div class="premiumModal" id="detailModal">
     <div class="modalBackdrop"></div>
     <div class="modalPanel">
@@ -302,7 +114,6 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<!-- Bottom Drawer (Mobile/Tablet) -->
 <div class="bottomDrawer" id="bottomDrawer">
     <div class="drawerStickyArea">
         <div class="drawerHandle"></div>

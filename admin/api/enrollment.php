@@ -93,6 +93,88 @@ try {
         exit;
     }
 
+    if ($action === 'bulkStatus') {
+        requirePost();
+        requireAjax();
+        verify_csrf();
+
+        $data = jsonInput();
+
+        $status = trim($data['status'] ?? '');
+
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $data['ids'] ?? []),
+            fn ($id) => $id > 0
+        )));
+
+        if (!$ids) {
+            throw new Exception('No valid IDs supplied');
+        }
+
+        if (!validateEnrollmentStatus($status)) {
+            throw new Exception('Invalid status');
+        }
+
+        if (count($ids) > 200) {
+            throw new Exception('Too many enrollments selected');
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare("UPDATE enrollments SET status = ?, updated_at = NOW()
+            WHERE id IN ($placeholders)
+        ");
+
+        $stmt->execute([
+            $status,
+            ...$ids
+        ]);
+
+        $updated = $stmt->rowCount();
+        $pdo->commit();
+
+        echo json_encode([
+            'ok' => true,
+            'updated' => $updated
+        ]);
+        exit;
+    }
+
+    if ($action === 'bulkDelete') {
+        requirePost();
+        requireAjax();
+        verify_csrf();
+        $data = jsonInput();
+
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $data['ids'] ?? []),
+            fn ($id) => $id > 0
+        )));
+
+        if (!$ids) {
+            throw new Exception('No valid IDs supplied');
+        }
+
+        if (count($ids) > 200) {
+            throw new Exception('Too many enrollments selected');
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("DELETE FROM enrollments WHERE id IN ($placeholders)");
+        $stmt->execute($ids);
+        $deleted = $stmt->rowCount();
+        $pdo->commit();
+
+        echo json_encode([
+            'ok' => true,
+            'deleted' => $deleted
+        ]);
+
+        exit;
+    }
+
     if ($action === 'get') {
         $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -135,10 +217,6 @@ try {
         $stmt = $pdo->prepare("DELETE FROM enrollments WHERE id = ?");
         $stmt->execute([$id]);
 
-        if ($stmt->rowCount() === 0) {
-            throw new Exception('Enrollment not found');
-        }
-
         echo json_encode([
             'ok' => true
         ]);
@@ -148,11 +226,13 @@ try {
 
     if ($action === 'search') {
         requireAjax();
-
         $search = trim($_GET['search'] ?? '');
         if (mb_strlen($search) > 100) { throw new Exception('Search too long'); }
         $program = trim($_GET['program'] ?? '');
         $status = trim($_GET['status'] ?? '');
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $limit = min(50, max(1, (int)($_GET['limit'] ?? 12)));
+        $offset = ($page - 1) * $limit;
         $where = [];
         $params = [];
 
@@ -186,18 +266,34 @@ try {
         }
 
         $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM enrollments $whereClause");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+        $totalPages = max(1, (int)ceil($total / $limit));
 
         $stmt = $pdo->prepare("SELECT id, full_name, email, phone, program, status, created_at,
             preferred_time, additional_info, student_name, grade, subject
-            FROM enrollments $whereClause ORDER BY created_at DESC LIMIT 50
+            FROM enrollments $whereClause ORDER BY created_at DESC LIMIT ? OFFSET ?
         ");
 
-        $stmt->execute($params);
+        // Bind the WHERE clause params (strings) first
+        foreach ($params as $i => $value) {
+            $stmt->bindValue($i + 1, $value, PDO::PARAM_STR);
+        }
+
+        // Bind LIMIT and OFFSET explicitly as integers
+        $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode([
             'ok' => true,
-            'enrollments' => $enrollments
+            'enrollments' => $enrollments,
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'totalPages' => $totalPages
         ]);
 
         exit;
@@ -211,6 +307,10 @@ try {
     ]);
 
 } catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
     http_response_code(400);
 
     error_log(sprintf(
@@ -222,6 +322,6 @@ try {
 
     echo json_encode([
         'ok' => false,
-        'e' => 'Something went wrong'
+        'e' => 'Something went wrong, please try again.'
     ]);
 }
