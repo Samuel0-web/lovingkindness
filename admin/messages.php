@@ -39,7 +39,7 @@ $whereClause = "WHERE " . implode(" AND ", $where);
 
 // Fetch messages
 $stmt = $pdo->prepare("
-    SELECT id, full_name, inquiry_type, status, created_at, message FROM contact_messages 
+    SELECT id, full_name, subject, inquiry_type, status, created_at, message FROM contact_messages 
     {$whereClause}
     ORDER BY FIELD(status, 'unread', 'read', 'replied'), created_at DESC
 ");
@@ -122,6 +122,16 @@ require_once __DIR__ . '/incs/header.php';
                 <?php foreach ($messages as $message): 
                     $inquiry = getInquiryTypeDetails($message['inquiry_type']);
                 ?>
+                <?php
+                    // Add this ABOVE the foreach loop:
+                    $statusBadgeIcons = [
+                        'unread'   => 'fas fa-circle',
+                        'read'     => 'fas fa-check',
+                        'replied'  => 'fas fa-reply',
+                        'archived' => 'fas fa-archive',
+                        'spam'     => 'fas fa-ban',
+                    ];
+                ?>
                     <div class="conversationItem <?= $message['status'] === 'unread' ? 'unread' : '' ?>" data-id="<?= $message['id'] ?>">
                         <div class="conversationAvatar">
                             <div class="avatarInitials">
@@ -138,8 +148,13 @@ require_once __DIR__ . '/incs/header.php';
                                     <i class="<?= $inquiry['icon'] ?>"></i>
                                     <span><?= $inquiry['label'] ?></span>
                                 </span>
+                                <span class="statusBadge status-<?= $message['status'] ?>">
+                                    <i class="<?= $statusBadgeIcons[$message['status']] ?? 'fas fa-circle' ?>"></i>
+                                    <span><?= ucfirst($message['status']) ?></span>
+                                </span>
                             </div>
-                            <div class="conversationPreview"><?= htmlspecialchars(cleanPreviewText(substr($message['message'], 0, 70))) ?></div>
+                            <div class="conversationSubject"><?= htmlspecialchars($message['subject'] ?? '') ?></div>
+                            <div class="conversationPreview"><?= htmlspecialchars(cleanPreviewText($message['message'])) ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>

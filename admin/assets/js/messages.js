@@ -15,6 +15,194 @@ const statusLabels = {
     spam: 'Spam'
 };
 
+// ========== Reply Templates ==========
+const REPLY_TEMPLATES = {
+    admissions: {
+        label: 'Admissions',
+        icon: 'fas fa-door-open',
+        body: `Thank you for your interest in joining us!\n\nWe'd love to help you through the admissions process. Please visit our admissions page for full requirements and upcoming intake dates. If you have any specific questions about eligibility or documentation, feel free to reply and we'll guide you every step of the way.\n\nWarm regards,\nAdmissions Team`
+    },
+    technical: {
+        label: 'Technical Support',
+        icon: 'fas fa-terminal',
+        body: `Thank you for reaching out — we're sorry to hear you're having trouble.\n\nTo help us resolve this as quickly as possible, could you share:\n- The device and browser you're using\n- Steps to reproduce the issue\n- Any error messages you've seen\n\nWe'll look into it and get back to you shortly.\n\nBest,\nTechnical Support Team`
+    },
+    tutoring: {
+        label: 'Tutoring',
+        icon: 'fas fa-graduation-cap',
+        body: `Thank you for your interest in our tutoring services!\n\nWe offer personalised one-on-one sessions tailored to your goals and schedule. To match you with the right tutor, could you let us know:\n- Subject area(s) you need help with\n- Your current level\n- Preferred days and times\n\nLooking forward to supporting your learning journey!\n\nKind regards,\nTutoring Team`
+    },
+    'teacher-training': {
+        label: 'Teacher Training',
+        icon: 'fas fa-chalkboard-teacher',
+        body: `Thank you for your interest in our teacher training programmes!\n\nWe offer professional development courses for educators at every stage of their career — from foundational certifications to advanced specialisations.\n\nPlease share your current teaching context and the areas you'd like to develop, and we'll recommend the best fit for you.\n\nKind regards,\nTeacher Training Team`
+    },
+    feedback: {
+        label: 'Feedback',
+        icon: 'fas fa-star',
+        body: `Thank you so much for taking the time to share your feedback — it really means a lot to us.\n\nWe take all comments seriously and will use your input to continue improving. If there's anything specific you'd like us to follow up on, please don't hesitate to let us know.\n\nGratefully,\nThe Support Team`
+    },
+    general: {
+        label: 'General Inquiry',
+        icon: 'fas fa-comment',
+        body: `Thank you for getting in touch!\n\nWe've received your message and will be in touch within 1–2 business days. If your matter is urgent, please call us directly and we'll be happy to assist.\n\nBest regards,\nSupport Team`
+    }
+};
+
+const TemplateManager = (() => {
+    const SESSION_KEY = 'inbox_last_template';
+
+    function getLastUsed() {
+        try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
+    }
+
+    function setLastUsed(key) {
+        try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
+    }
+
+    function apply(key) {
+        const template = REPLY_TEMPLATES[key];
+        if (!template) return;
+        const textarea = document.getElementById('replyText');
+        if (!textarea) return;
+        textarea.value = template.body;
+        textarea.dispatchEvent(new Event('input')); // triggers auto-resize + draft save
+        textarea.focus();
+        setLastUsed(key);
+    }
+
+    function open() {
+        const dropdown = document.getElementById('templateDropdown');
+        const btn = document.querySelector('[data-action="toggleTemplates"]');
+        if (!dropdown || !btn) return;
+
+        // Mark last used option before opening
+        const lastUsed = getLastUsed();
+        dropdown.querySelectorAll('.templateOption').forEach(opt => {
+            const pill = opt.querySelector('.lastUsedPill');
+            if (lastUsed && opt.dataset.template === lastUsed) {
+                if (!pill) {
+                    const p = document.createElement('span');
+                    p.className = 'lastUsedPill';
+                    p.textContent = 'Last used';
+                    opt.appendChild(p);
+                }
+            } else if (pill) {
+                pill.remove();
+            }
+        });
+
+        dropdown.classList.add('open');
+        btn.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+
+        // Defer document listener so the current click doesn't immediately close it
+        setTimeout(() => {
+            document.addEventListener('click', _onOutsideClick, { once: true });
+        }, 0);
+    }
+
+    function close() {
+        const dropdown = document.getElementById('templateDropdown');
+        const btn = document.querySelector('[data-action="toggleTemplates"]');
+        if (dropdown) dropdown.classList.remove('open');
+        if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+    }
+
+    function toggle() {
+        const dropdown = document.getElementById('templateDropdown');
+        if (dropdown?.classList.contains('open')) { close(); } else { open(); }
+    }
+
+    function _onOutsideClick(e) {
+        const bar = document.getElementById('templateBar');
+        if (bar && !bar.contains(e.target)) close();
+    }
+
+    return { apply, open, close, toggle };
+})();
+
+function renderTemplateDropdownHtml() {
+    return Object.entries(REPLY_TEMPLATES).map(([key, tmpl]) => `
+        <button class="templateOption" data-action="selectTemplate" data-template="${key}" role="menuitem">
+            <i class="${tmpl.icon}" aria-hidden="true"></i>
+            ${escapeHtml(tmpl.label)}
+        </button>
+    `).join('');
+}
+
+// ========== Draft Manager ==========
+const DraftManager = (() => {
+    const PREFIX = 'inbox_draft_';
+    let _autoSaveTimer = null;
+
+    function _key(id) {
+        return `${PREFIX}${id}`;
+    }
+
+    function save(id, text) {
+        if (!id) return;
+        try {
+            if (text.trim() === '') {
+                localStorage.removeItem(_key(id));
+            } else {
+                localStorage.setItem(_key(id), text);
+            }
+        } catch (e) {
+            console.warn('Draft save failed:', e);
+        }
+    }
+
+    function get(id) {
+        if (!id) return null;
+        try {
+            return localStorage.getItem(_key(id));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function remove(id) {
+        if (!id) return;
+        try {
+            localStorage.removeItem(_key(id));
+        } catch (e) {}
+    }
+
+    function startAutoSave(id, getTextFn) {
+        stopAutoSave();
+        _autoSaveTimer = setInterval(() => {
+            save(id, getTextFn());
+        }, 5000);
+    }
+
+    function stopAutoSave() {
+        if (_autoSaveTimer) {
+            clearInterval(_autoSaveTimer);
+            _autoSaveTimer = null;
+        }
+    }
+
+    return { save, get, remove, startAutoSave, stopAutoSave };
+})();
+
+// ========== Status Badge Helper ==========
+const statusBadgeConfig = {
+    unread:   { icon: 'fas fa-circle',  label: 'Unread'   },
+    read:     { icon: 'fas fa-check',   label: 'Read'     },
+    replied:  { icon: 'fas fa-reply',   label: 'Replied'  },
+    archived: { icon: 'fas fa-archive', label: 'Archived' },
+    spam:     { icon: 'fas fa-ban',     label: 'Spam'     },
+};
+
+function getStatusBadgeHtml(status) {
+    const cfg = statusBadgeConfig[status] || statusBadgeConfig.read;
+    return `<span class="statusBadge status-${status}">
+        <i class="${cfg.icon}" aria-hidden="true"></i>
+        <span>${cfg.label}</span>
+    </span>`;
+}
+
 function csrfHeaders() {
     return {
         'X-CSRF-TOKEN': window.CSRF_TOKEN,
@@ -223,6 +411,15 @@ function prependConversation(message) {
                         <i class="${inquiry.icon}"></i>
                         <span>${inquiry.label}</span>
                     </span>
+                    ${getStatusBadgeHtml('unread')}
+                </div>
+
+                <div class="conversationSubject">
+                    ${escapeHtml(message.subject || '')}
+                </div>
+
+                <div class="conversationPreview">
+                    ${escapeHtml(cleanPreviewText(message.message))}
                 </div>
 
                 <div class="conversationPreview">
@@ -259,17 +456,7 @@ function renderConversationList(messages, totalMessages = 0) {
     };
 
     conversationStream.innerHTML = messages.map(message => {
-        const inquiry =
-            inquiryTypes[message.inquiry_type] ||
-            inquiryTypes.general;
-
-        const preview = escapeHtml(
-            (message.message || '')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .substring(0, 70)
-        );
-
+        const inquiry = inquiryTypes[message.inquiry_type] || inquiryTypes.general;
         const initials = message.full_name
             .split(' ')
             .map(word => word[0])
@@ -288,7 +475,6 @@ function renderConversationList(messages, totalMessages = 0) {
                         <span class="senderName">
                             ${escapeHtml(message.full_name)}
                         </span>
-
                         <span class="conversationTime" data-time="${message.created_at}">
                             ${formatRelativeTime(message.created_at)}
                         </span>
@@ -299,10 +485,15 @@ function renderConversationList(messages, totalMessages = 0) {
                             <i class="${inquiry.icon}"></i>
                             <span>${inquiry.label}</span>
                         </span>
+                        ${getStatusBadgeHtml(message.status)}
+                    </div>
+
+                    <div class="conversationSubject">
+                        ${escapeHtml(message.subject || '')}
                     </div>
 
                     <div class="conversationPreview">
-                        ${preview}
+                        ${escapeHtml(cleanPreviewText(message.message))}
                     </div>
                 </div>
             </div>
@@ -358,15 +549,17 @@ async function updateMessageStatus(id, status) {
     }
 }
 
+// FIND & REPLACE the whole function:
 function updateConversationItemStatus(id, status) {
     const item = document.querySelector(`.conversationItem[data-id="${id}"]`);
-
     if (!item) return;
-
     item.classList.remove('unread', 'read', 'replied', 'archived', 'spam');
     item.classList.add(status);
 
-    const avatar = item.querySelector('.conversationAvatar');
+    const existingBadge = item.querySelector('.statusBadge');
+    if (existingBadge) {
+        existingBadge.outerHTML = getStatusBadgeHtml(status);
+    }
 }
 
 function updateDetailPanelStatus(status) {
@@ -491,6 +684,7 @@ async function deleteMessage(id) {
 }
 
 async function loadMessageDetail(id) {
+    DraftManager.stopAutoSave();
     currentMessageId = id;
     
     // Update selected state
@@ -518,6 +712,7 @@ async function loadMessageDetail(id) {
 
             renderConversationDetail(message);
             initAutoResizeTextarea();
+            initDraftSaving(id);
             showConversationDetail();
 
             if (window.innerWidth <= 768) {
@@ -619,6 +814,16 @@ function renderConversationDetail(message) {
             
             <div class="composerSection">
                 <div class="composerLabel">Reply to ${escapeHtml(message.full_name)}</div>
+                <div class="templateBar" id="templateBar">
+                    <button class="templateBtn" data-action="toggleTemplates" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                        Templates
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div class="templateDropdown" id="templateDropdown" role="menu">
+                        ${renderTemplateDropdownHtml()}
+                    </div>
+                </div>
                 <textarea id="replyText" class="composerTextarea" rows="1" placeholder="Type your reply..."></textarea>
                 <div class="composerActions">
                     <button class="btnPrimary" data-action="submitReply" data-id="${message.id}">
@@ -703,6 +908,12 @@ conversationDetail.addEventListener('click', (e) => {
         const content = trigger.nextElementSibling;
         trigger.classList.toggle('open');
         content.classList.toggle('show');
+    } else if (action === 'toggleTemplates') {
+        TemplateManager.toggle();
+    } else if (action === 'selectTemplate') {
+        const key = btn.dataset.template;
+        TemplateManager.apply(key);
+        TemplateManager.close();
     }
 });
 
@@ -738,8 +949,10 @@ async function submitReply(id, btn) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     btn.disabled = true;
     const success = await sendReply(id, replyText);
-    
+
     if (success) {
+        DraftManager.remove(id);       // wipe draft on success
+        DraftManager.stopAutoSave();   // stop the interval too
         btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
         setTimeout(() => {
             btn.innerHTML = originalText;
@@ -864,6 +1077,17 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+// ========== Preview Text Helper ==========
+function cleanPreviewText(text, maxLength = 160) {
+    if (!text) return '';
+    return text
+        .replace(/\r\n|\r|\n/g, ' ')   // flatten line breaks to spaces
+        .replace(/\s+/g, ' ')           // collapse multiple spaces/tabs
+        .replace(/<[^>]*>/g, '')        // strip any accidental HTML
+        .trim()
+        .substring(0, maxLength);
+}
+
 function initAutoResizeTextarea() {
     const textarea = document.getElementById('replyText');
     if (!textarea) return;
@@ -885,6 +1109,45 @@ function initAutoResizeTextarea() {
             sendBtn?.click();
         }
     });
+}
+
+function initDraftSaving(id) {
+    const textarea = document.getElementById('replyText');
+    if (!textarea) return;
+
+    // Restore draft if one exists
+    const draft = DraftManager.get(id);
+    if (draft) {
+        textarea.value = draft;
+        textarea.dispatchEvent(new Event('input')); // triggers auto-resize
+        showDraftIndicator();
+    }
+
+    // Save on every keystroke (debounced 500ms)
+    const debouncedSave = debounce(() => {
+        DraftManager.save(id, textarea.value);
+    }, 500);
+
+    textarea.addEventListener('input', debouncedSave);
+
+    // Belt-and-suspenders: also auto-save every 5 seconds
+    DraftManager.startAutoSave(id, () => textarea.value);
+}
+
+function showDraftIndicator() {
+    const actions = document.querySelector('.composerActions');
+    if (!actions || document.getElementById('draftIndicator')) return;
+    const indicator = document.createElement('span');
+    indicator.id = 'draftIndicator';
+    indicator.className = 'draftIndicator';
+    indicator.innerHTML = '<i class="fas fa-pencil-alt"></i> Draft restored';
+    actions.appendChild(indicator);
+
+    // Fade out after 3 seconds
+    setTimeout(() => {
+        indicator.classList.add('fading');
+        setTimeout(() => indicator.remove(), 300);
+    }, 3000);
 }
 
 // ========== Event Listeners ==========
